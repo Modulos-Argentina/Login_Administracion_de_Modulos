@@ -1,0 +1,37 @@
+@page
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Portal Docente";
+    ViewData["Role"] = "Docente Académico";
+}
+
+@section SidebarNav {
+    <a href="/Dashboard/Docente" class="nav-item active">
+        <i class="ph ph-squares-four"></i>
+        Dashboard
+    </a>
+    <a href="#" class="nav-item">
+        <i class="ph ph-books"></i>
+        Mis Cursos
+    </a>
+    <a href="#" class="nav-item">
+        <i class="ph ph-student"></i>
+        Asistencia
+    </a>
+    <a href="#" class="nav-item">
+        <i class="ph ph-exam"></i>
+        Calificaciones
+    </a>
+}
+
+<div class="page-header">
+    <h1>Portal Docente</h1>
+    <p>Gestión académica y seguimiento de alumnos</p>
+    <div class="header-accent"></div>
+</div>
+
+<div class="construction-card">
+    <i class="ph ph-chalkboard-teacher construction-icon"></i>
+    <h2>Módulo en Construcción</h2>
+    <p>Estamos diseñando este componente para brindarte la mejor experiencia en la Intranet IESTP Argentina.</p>
+</div>

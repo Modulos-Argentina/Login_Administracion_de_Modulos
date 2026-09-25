@@ -1,0 +1,29 @@
+@page
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Dashboard de Tópico";
+    ViewData["Role"] = "Bienestar Estudiantil";
+}
+
+@section SidebarNav {
+    <a href="/Dashboard/Topico" class="nav-item active">
+        <i class="ph ph-squares-four"></i>
+        Dashboard
+    </a>
+    <a href="#" class="nav-item">
+        <i class="ph ph-clipboard-text"></i>
+        Registro de pacientes
+    </a>
+}
+
+<div class="page-header">
+    <h1>Dashboard de Tópico</h1>
+    <p>Resumen del servicio de salud física del día</p>
+    <div class="header-accent"></div>
+</div>
+
+<div class="construction-card">
+    <i class="ph ph-activity construction-icon"></i>
+    <h2>Módulo en Construcción</h2>
+    <p>Estamos diseñando este componente para brindarte la mejor experiencia en la Intranet IESTP Argentina.</p>
+</div>

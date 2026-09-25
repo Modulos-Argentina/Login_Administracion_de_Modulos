@@ -1,0 +1,37 @@
+@page
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Admin. Soporte";
+    ViewData["Role"] = "Administrador de TI";
+}
+
+@section SidebarNav {
+    <a href="/Dashboard/Soporte" class="nav-item active">
+        <i class="ph ph-squares-four"></i>
+        Dashboard
+    </a>
+    <a href="#" class="nav-item">
+        <i class="ph ph-ticket"></i>
+        Tickets Activos
+    </a>
+    <a href="#" class="nav-item">
+        <i class="ph ph-users-gear"></i>
+        Gestión de Usuarios
+    </a>
+    <a href="#" class="nav-item">
+        <i class="ph ph-chart-line-up"></i>
+        Reportes del Sistema
+    </a>
+}
+
+<div class="page-header">
+    <h1>Administración y Soporte</h1>
+    <p>Gestión de incidencias y control del sistema</p>
+    <div class="header-accent"></div>
+</div>
+
+<div class="construction-card">
+    <i class="ph ph-wrench construction-icon"></i>
+    <h2>Módulo en Construcción</h2>
+    <p>Estamos diseñando este componente para brindarte la mejor experiencia en la Intranet IESTP Argentina.</p>
+</div>

@@ -1,0 +1,33 @@
+@page
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Dashboard de Psicología";
+    ViewData["Role"] = "Bienestar Estudiantil";
+}
+
+@section SidebarNav {
+    <a href="/Dashboard/Psicologia" class="nav-item active">
+        <i class="ph ph-squares-four"></i>
+        Dashboard
+    </a>
+    <a href="#" class="nav-item">
+        <i class="ph ph-users"></i>
+        Citas Programadas
+    </a>
+    <a href="#" class="nav-item">
+        <i class="ph ph-file-text"></i>
+        Historial Clínico
+    </a>
+}
+
+<div class="page-header">
+    <h1>Dashboard de Psicología</h1>
+    <p>Resumen del servicio de salud mental y bienestar</p>
+    <div class="header-accent"></div>
+</div>
+
+<div class="construction-card">
+    <i class="ph ph-brain construction-icon"></i>
+    <h2>Módulo en Construcción</h2>
+    <p>Estamos diseñando este componente para brindarte la mejor experiencia en la Intranet IESTP Argentina.</p>
+</div>

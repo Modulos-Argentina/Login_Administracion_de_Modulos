@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Intranet IESTP Argentina</title>
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@@phosphor-icons/web"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="top-header">
+        <div class="logo-container">
+            <i class="ph-fill ph-graduation-cap"></i>
+        </div>
+        <div class="header-actions">
+            <div class="profile-avatar-small">RF</div>
+            <button class="btn-icon">
+                <i class="ph ph-sign-out"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-profile">
+                <div class="profile-avatar-large">
+                    RF
+                    <span class="online-dot"></span>
+                </div>
+                <div class="profile-info">
+                    <h4>Lic. Rosa Fernández</h4>
+                    <p>@ViewData["Role"]</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                @RenderSection("SidebarNav", required: false)
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="/Index" class="btn-logout">
+                    <i class="ph ph-sign-out"></i>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            @RenderBody()
+        </main>
+    </div>
+</body>
+</html>
