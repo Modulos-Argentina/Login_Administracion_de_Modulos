@@ -1,3 +1,116 @@
+# 📘 Documentación Técnica del Sistema
+## Módulo 8: Autenticación, Roles, Seguridad y Administración de Módulos
+
+---
+
+## 1. 📋 Resumen del Módulo
+El **Módulo 8** implementa la capa central de seguridad, control de acceso basado en roles (**RBAC** - *Role-Based Access Control*) y administración de sesiones del instituto. Proporciona una experiencia de acceso dual unificada para la comunidad académica y administrativa, integrando tanto autenticación tradicional por credenciales como inicio de sesión institucional federado.
+
+### Principales Características:
+- **Autenticación Dual:**
+  - **Local:** Acceso mediante DNI y contraseña cifrada.
+  - **Federada:** Single Sign-On (SSO) institucional con Google (validación por correo institucional sin exigir clave local).
+- **Control de Acceso Basado en Roles (RBAC):** Catálogo de perfiles (Docente, Alumno, Psicología, Tópico, Soporte, etc.) y asignación de permisos modulares granulares.
+- **Auditoría de Accesos:** Registro del origen de la sesión, IP, método de login y expiración en la base de datos.
+- **Arquitectura MVC en .NET 10:** Código estructurado en Controladores, Modelos y Vistas, desacoplado y mantenible.
+- **Despliegue Continuo (CI/CD):** Pipeline con GitHub Actions que compila y publica automáticamente hacia MonsterASP al hacer push en la rama `master`.
+
+---
+
+## 2. 🏗️ Arquitectura y Stack Tecnológico
+
+| Capa | Tecnología / Herramienta | Descripción |
+| :--- | :--- | :--- |
+| **Framework Web** | ASP.NET Core MVC (.NET 10) | Motor web principal, enrutamiento MVC y middlewares |
+| **Lenguaje** | C# 14 / .NET 10 | Lógica del servidor y controladores |
+| **Base de Datos** | PostgreSQL | Motor relacional para usuarios, roles, permisos y sesiones |
+| **Driver de BD** | Npgsql (ADO.NET) | Conector de alto rendimiento para PostgreSQL |
+| **Frontend** | Razor Views (`.cshtml`), HTML5, CSS3, Vanilla JS | Interfaz de usuario con diseño moderno y soporte móvil |
+| **Librerías UI** | Bootstrap 5, Font Awesome, Google Fonts | Tipografía, iconos vectoriales y grilla responsiva |
+| **CI/CD** | GitHub Actions | Automatización de compilación y publicación FTP |
+| **Hosting** | MonsterASP | Servidor de alojamiento web para producción |
+
+---
+
+## 3. 📂 Estructura del Proyecto
+
+```plaintext
+Login_Administracion_de_Modulos/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml             # Pipeline de despliegue automático a MonsterASP
+├── Login_Administracion_de_Modulos/
+│   ├── Controlador/
+│   │   └── LoginController.cs     # Controlador MVC: rutas de login DNI, Google y redirecciones
+│   ├── Model/
+│   │   └── Usuario.cs             # Modelo entidad de datos del usuario
+│   ├── Vista/
+│   │   ├── Dashboard/
+│   │   │   ├── Docente.cshtml     # Panel de gestión académica para docentes
+│   │   │   ├── Psicologia.cshtml  # Panel de bienestar y expedientes psicológicos
+│   │   │   ├── Soporte.cshtml     # Panel de inventario, equipos y laboratorios
+│   │   │   └── Topico.cshtml      # Panel de atenciones de enfermería y salud
+│   │   ├── Shared/
+│   │   │   ├── _Layout.cshtml     # Plantilla maestra común
+│   │   │   └── _ValidationScriptsPartial.cshtml
+│   │   ├── Index.cshtml           # Vista principal con formulario dual (DNI / Google SSO)
+│   │   ├── Error.cshtml           # Vista amigable de control de excepciones
+│   │   └── Privacy.cshtml         # Políticas de privacidad
+│   ├── wwwroot/
+│   │   ├── css/
+│   │   │   ├── login.css          # Estilos personalizados de la interfaz de login
+│   │   │   ├── dashboard.css      # Estilos visuales de los dashboards por rol
+│   │   │   └── site.css           # Estilos globales de la aplicación
+│   │   ├── js/                    # Scripts de frontend
+│   │   └── lib/                   # Librerías cliente (Bootstrap, jQuery)
+│   ├── appsettings.json           # Configuración de conexiones de BD y entorno
+│   ├── Documentacion.md           # Este archivo de especificación técnica y SQL
+│   ├── Login_Administracion_de_Modulos.csproj
+│   └── Program.cs                 # Punto de entrada, configuración de servicios y middlewares
+├── COMANDOS_GIT.md                # Guía de comandos Git para ramas y despliegue
+└── README.md                      # Resumen general del repositorio
+```
+
+---
+
+## 4. 🔀 Flujo y Rutas de Autenticación
+
+El controlador principal `LoginController` expone las siguientes rutas:
+
+### 1. `GET /` o `GET /Login`
+- **Método:** `Index()`
+- **Comportamiento:** Renderiza la vista `Vista/Index.cshtml`, permitiendo al usuario seleccionar entre login por DNI y acceso mediante Google SSO.
+
+### 2. `POST /login-dni`
+- **Método:** `LoginDni(string dni, string clave)`
+- **Parámetros:** `dni` (número de documento) y `clave` (contraseña ingresada).
+- **Proceso:**
+  1. Conecta a PostgreSQL usando la cadena de conexión `DefaultConnection`.
+  2. Consulta la tabla `usuarios` verificando que `dni_login = @dni` y `estado = 'Activo'`.
+  3. Compara la clave ingresada contra `clave_cifrada`.
+  4. Si las credenciales son válidas, registra la sesión y redirige a la acción de bienvenida o dashboard correspondiente.
+  5. En caso de error, retorna a `Index.cshtml` con un mensaje descriptivo en `ViewBag.Error`.
+
+### 3. `POST /login-google`
+- **Método:** `LoginGoogle(string correo)`
+- **Parámetros:** `correo` (correo electrónico institucional autenticado).
+- **Proceso:**
+  1. Valida la existencia del correo en la tabla `usuarios` donde `estado = 'Activo'`.
+  2. No solicita ni valida contraseña (confianza delegada en el proveedor SSO).
+  3. Registra la sesión en la base de datos con método `GOOGLE_SSO`.
+  4. Responde con un payload JSON `{ success: true, redirectUrl: "/Login/Bienvenido" }`.
+
+### 4. `GET /Login/Bienvenido`
+- **Método:** `Bienvenido()`
+- **Comportamiento:** Punto de entrada posterior a la validación satisfactoria previa a la navegación hacia el dashboard del rol asignado.
+
+---
+
+## 5. 🗄️ Esquema de Base de Datos (PostgreSQL)
+
+A continuación se presenta el script DDL completo para la creación del esquema relacional, catálogos por defecto y disparadores de auditoría:
+
+```sql
 -- ====================================================================================
 -- MÓDULO 8: AUTENTICACIÓN, ROLES Y SEGURIDAD (PostgreSQL)
 -- Lógica: Login Dual (DNI local o Google SSO por validación de correo único)
@@ -155,15 +268,40 @@ CREATE TRIGGER tr_usuarios_actualizado
 BEFORE UPDATE ON usuarios
 FOR EACH ROW
 EXECUTE FUNCTION actualizar_timestamp();
+```
 
--- ====================================================================================
--- ACTUALIZACIÓN: ARQUITECTURA MVC BÁSICA PARA EL LOGIN
--- ====================================================================================
-/*
-Se implementó una arquitectura MVC sencilla para el login:
-1. **Modelo**: Se creó la clase `Model/Usuario.cs` para mapear los datos del usuario extraídos de la tabla `usuarios`.
-2. **Controlador**: Se creó `Controlador/LoginController.cs` con métodos `Index` (GET y POST) para procesar las credenciales contra la base de datos PostgreSQL utilizando ADO.NET (`NpgsqlConnection`).
-3. **Vista**: Se modificó `Vista/Index.cshtml` para eliminar las directivas de Razor Pages (`@page`, `@model`) y conectarlo al `LoginController`.
-4. **Configuración**: Se actualizó `Program.cs` para usar `AddControllersWithViews()` y `MapControllerRoute()`, y se corrigió el archivo `appsettings.json` garantizando un formato JSON válido para la cadena de conexión.
-Si el usuario se autentica correctamente y está activo, es redirigido a una página en blanco (`/Login/Bienvenido`). De lo contrario, se muestra un mensaje de error en la misma vista de login.
-*/
+---
+
+## 6. ⚙️ Configuración del Entorno (`appsettings.json`)
+
+Para conectar la aplicación con PostgreSQL, configura la cadena de conexión dentro de `appsettings.json`:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=TU_HOST_POSTGRES;Port=5432;Database=TU_BASE_DATOS;Username=TU_USUARIO;Password=TU_PASSWORD;SSL Mode=Prefer;Trust Server Certificate=true"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
+```
+
+---
+
+## 7. 🚀 Despliegue e Integración Continua (CI/CD)
+
+El archivo `.github/workflows/deploy.yml` orquesta la compilación y entrega continua:
+
+1. **Disparador:** Cada `push` hacia la rama **`master`** inicia automáticamente el pipeline en GitHub Actions.
+2. **Entorno de compilación:** Contenedor `ubuntu-latest` con el SDK oficial de **.NET 10**.
+3. **Publicación:** Ejecuta `dotnet publish -c Release -o ./publish_output`.
+4. **Sincronización:** Mediante la acción `SamKirkland/FTP-Deploy-Action@v4.3.5`, transfiere el contenido generado al directorio `/wwwroot/` de **MonsterASP**.
+
+> [!TIP]
+> Para consultar cómo gestionar ramas, preparar commits y sincronizar con GitHub, consulta el documento:
+> 👉 [Guía de Comandos Git (COMANDOS_GIT.md)](file:///c:/Users/Arias/Videos/Login_Administracion_de_Modulos/COMANDOS_GIT.md)
