@@ -1,0 +1,30 @@
+name: Despliegue Automático a MonsterASP
+
+# Esto hace que se ejecute cada vez que haces un "push" a la rama principal (main)
+on:
+  push:
+    branches:
+      - main  # Si tu rama principal se llama "master", cámbialo aquí
+
+jobs:
+  deploy:
+    name: Subir archivos por FTP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Sincronizar archivos al Hosting
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21 # Puerto de FTPS seguro según tu imagen
+          server-dir: /wwwroot/ # La carpeta raíz que indica tu imagen
+          # excluye archivos de git o la propia configuración de actions
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github*/**
