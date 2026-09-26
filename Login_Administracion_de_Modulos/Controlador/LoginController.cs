@@ -53,11 +53,11 @@ namespace Login_Administracion_de_Modulos.Controlador
                             if (reader.Read())
                             {
                                 int idUsuario = reader.GetInt32(0);
-                                string claveCifradaDb = reader.GetString(1);
+                                string claveCifradaDb = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
                                 
                                 // 2. Comparamos contraseñas (Idealmente usando BCrypt.Net u otra librería de hashing)
                                 // Ejemplo si usaras BCrypt: bool esValida = BCrypt.Net.BCrypt.Verify(clave, claveCifradaDb);
-                                bool esValida = (clave == claveCifradaDb); // Comparación simple temporal
+                                bool esValida = (clave == claveCifradaDb) || (claveCifradaDb == "$2b$10$HashSimuladoDe" + clave); // Comparación simple temporal y para hash simulado
 
                                 if (esValida)
                                 {
