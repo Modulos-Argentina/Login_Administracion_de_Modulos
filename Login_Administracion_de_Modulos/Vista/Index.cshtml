@@ -75,7 +75,10 @@
                     <label>Contraseña</label>
                     <div class="input-wrapper">
                         <i class="ph ph-lock"></i>
-                        <input type="password" name="clave" class="form-control" placeholder="••••••••" required />
+                        <input type="password" id="passwordInput" name="clave" class="form-control" placeholder="••••••••" required />
+                        <button type="button" class="btn-toggle-password" onclick="togglePassword()">
+                            <i class="ph ph-eye" id="toggleIcon"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -143,5 +146,22 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('ph-eye');
+                toggleIcon.classList.add('ph-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('ph-eye-slash');
+                toggleIcon.classList.add('ph-eye');
+            }
+        }
+    </script>
 </body>
 </html>
