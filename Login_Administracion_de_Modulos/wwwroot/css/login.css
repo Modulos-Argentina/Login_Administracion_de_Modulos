@@ -126,15 +126,35 @@ body {
     margin-bottom: 2rem;
 }
 
+.logo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.institute-logo {
+    width: 150px;
+    height: auto;
+    filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.4));
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.institute-logo:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 20px rgba(0, 242, 254, 0.7));
+}
+
 .login-header h2 {
     font-size: 1.75rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
+    text-align: center;
 }
 
 .login-header p {
     color: var(--text-secondary);
     font-size: 0.875rem;
+    text-align: center;
 }
 
 .btn-google {
