@@ -4,6 +4,7 @@ using Npgsql;
 using Login_Administracion_de_Modulos.Model;
 using System;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Login_Administracion_de_Modulos.Controlador
 {
