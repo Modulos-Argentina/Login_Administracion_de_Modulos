@@ -26,7 +26,7 @@ namespace Login_Administracion_de_Modulos.Controlador
         {
             ViewBag.UserName = HttpContext.Session.GetString("UsuarioNombre") ?? "Lic. Juan Psicólogo";
             ViewBag.UserRole = HttpContext.Session.GetString("UsuarioRol") ?? "Psicología";
-            return View("~/Vista/Dashboard/Psicologia.cshtml");
+            return View("~/Areas/Modulo05/Views/psicologia.cshtml");
         }
 
         [HttpGet("/Dashboard/Docente")]
