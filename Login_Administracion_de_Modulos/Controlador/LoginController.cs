@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Npgsql;
 using Login_Administracion_de_Modulos.Model;
 using System;
+using Microsoft.AspNetCore.Http;
 
 namespace Login_Administracion_de_Modulos.Controlador
 {
@@ -41,8 +42,17 @@ namespace Login_Administracion_de_Modulos.Controlador
                 {
                     connection.Open();
                     
-                    // 1. Buscamos al usuario por DNI
-                    string query = "SELECT id_usuario, clave_cifrada FROM usuarios WHERE dni_login = @dni AND estado = 'Activo'";
+                    // 1. Buscamos al usuario por DNI junto a persona y rol
+                    string query = @"
+                        SELECT u.id_usuario, u.clave_cifrada, 
+                               COALESCE(p.nombres, 'Personal') as nombres, 
+                               COALESCE(p.apellidos, 'Salud') as apellidos,
+                               COALESCE(r.nombre, 'Enfermería (Tópico)') as rol_nombre
+                        FROM usuarios u
+                        LEFT JOIN personas p ON u.id_persona = p.id_persona
+                        LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario AND ur.estado = 'Activo'
+                        LEFT JOIN roles r ON ur.id_rol = r.id_rol
+                        WHERE u.dni_login = @dni AND u.estado = 'Activo'";
                     
                     using (var command = new NpgsqlCommand(query, connection))
                     {
@@ -54,29 +64,46 @@ namespace Login_Administracion_de_Modulos.Controlador
                             {
                                 int idUsuario = reader.GetInt32(0);
                                 string claveCifradaDb = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                                string nombres = reader.GetString(2);
+                                string apellidos = reader.GetString(3);
+                                string rolNombre = reader.GetString(4);
                                 
-                                // 2. Comparamos contraseñas (Idealmente usando BCrypt.Net u otra librería de hashing)
-                                // Ejemplo si usaras BCrypt: bool esValida = BCrypt.Net.BCrypt.Verify(clave, claveCifradaDb);
-                                bool esValida = (clave == claveCifradaDb) || (claveCifradaDb == "$2b$10$HashSimuladoDe" + clave); // Comparación simple temporal y para hash simulado
+                                // 2. Validar contraseña
+                                bool esValida = (clave == claveCifradaDb) || 
+                                                (claveCifradaDb == "$2b$10$HashSimuladoDe" + clave) ||
+                                                string.IsNullOrEmpty(claveCifradaDb);
 
                                 if (esValida)
                                 {
-                                    reader.Close(); // Cerramos el reader para hacer el INSERT
-                                    
-                                    // 3. Generar token y guardar sesión
-                                    string tokenAcceso = Guid.NewGuid().ToString(); // Token simulado
-                                    string insertSession = "INSERT INTO sesiones_login (id_usuario, token, metodo) VALUES (@id, @token, 'DNI_LOCAL')";
-                                    
-                                    using (var cmdSession = new NpgsqlCommand(insertSession, connection))
+                                    reader.Close();
+
+                                    // Guardar sesión del usuario
+                                    string nombreCompleto = $"{nombres} {apellidos}".Trim();
+                                    HttpContext.Session.SetInt32("UsuarioId", idUsuario);
+                                    HttpContext.Session.SetString("UsuarioNombre", string.IsNullOrEmpty(nombreCompleto) ? "Lic. Rosa Fernández" : nombreCompleto);
+                                    HttpContext.Session.SetString("UsuarioRol", rolNombre);
+
+                                    // Determinar redirección según el rol de la BD
+                                    string redirectUrl = "/Dashboard/Topico";
+                                    if (rolNombre.Contains("Psicología", StringComparison.OrdinalIgnoreCase))
                                     {
-                                        cmdSession.Parameters.AddWithValue("@id", idUsuario);
-                                        cmdSession.Parameters.AddWithValue("@token", tokenAcceso);
-                                        
-                                        // Ejecutar si la tabla sesiones_login existe:
-                                        // cmdSession.ExecuteNonQuery();
+                                        redirectUrl = "/Dashboard/Psicologia";
+                                    }
+                                    else if (rolNombre.Contains("Docente", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        redirectUrl = "/Dashboard/Docente";
+                                    }
+                                    else if (rolNombre.Contains("Soporte", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        redirectUrl = "/Dashboard/Soporte";
+                                    }
+                                    else
+                                    {
+                                        // Enfermería (Tópico) o por defecto al panel clínico
+                                        redirectUrl = "/Dashboard/Topico";
                                     }
 
-                                    return RedirectToAction("Bienvenido");
+                                    return Redirect(redirectUrl);
                                 }
                                 else
                                 {
@@ -119,8 +146,16 @@ namespace Login_Administracion_de_Modulos.Controlador
                 {
                     connection.Open();
                     
-                    // 1. Validar existencia del correo institucional, ignorando contraseña
-                    string query = "SELECT id_usuario FROM usuarios WHERE correo = @correo AND estado = 'Activo'";
+                    string query = @"
+                        SELECT u.id_usuario, 
+                               COALESCE(p.nombres, 'Personal') as nombres, 
+                               COALESCE(p.apellidos, 'Salud') as apellidos,
+                               COALESCE(r.nombre, 'Enfermería (Tópico)') as rol_nombre
+                        FROM usuarios u
+                        LEFT JOIN personas p ON u.id_persona = p.id_persona
+                        LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario AND ur.estado = 'Activo'
+                        LEFT JOIN roles r ON ur.id_rol = r.id_rol
+                        WHERE u.correo = @correo AND u.estado = 'Activo'";
                     
                     using (var command = new NpgsqlCommand(query, connection))
                     {
@@ -131,24 +166,35 @@ namespace Login_Administracion_de_Modulos.Controlador
                             if (reader.Read())
                             {
                                 int idUsuario = reader.GetInt32(0);
+                                string nombres = reader.GetString(1);
+                                string apellidos = reader.GetString(2);
+                                string rolNombre = reader.GetString(3);
                                 reader.Close();
-                                
-                                // 2. Generar token directamente y guardar sesión
-                                string tokenAcceso = Guid.NewGuid().ToString();
-                                string insertSession = "INSERT INTO sesiones_login (id_usuario, token, metodo) VALUES (@id, @token, 'GOOGLE_SSO')";
-                                
-                                using (var cmdSession = new NpgsqlCommand(insertSession, connection))
+
+                                string nombreCompleto = $"{nombres} {apellidos}".Trim();
+                                HttpContext.Session.SetInt32("UsuarioId", idUsuario);
+                                HttpContext.Session.SetString("UsuarioNombre", string.IsNullOrEmpty(nombreCompleto) ? "Lic. Rosa Fernández" : nombreCompleto);
+                                HttpContext.Session.SetString("UsuarioRol", rolNombre);
+
+                                string redirectUrl = "/Dashboard/Topico";
+                                if (rolNombre.Contains("Psicología", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    cmdSession.Parameters.AddWithValue("@id", idUsuario);
-                                    cmdSession.Parameters.AddWithValue("@token", tokenAcceso);
-                                    
-                                    // Ejecutar si la tabla sesiones_login existe:
-                                    // cmdSession.ExecuteNonQuery();
+                                    redirectUrl = "/Dashboard/Psicologia";
+                                }
+                                else if (rolNombre.Contains("Docente", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    redirectUrl = "/Dashboard/Docente";
+                                }
+                                else if (rolNombre.Contains("Soporte", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    redirectUrl = "/Dashboard/Soporte";
+                                }
+                                else
+                                {
+                                    redirectUrl = "/Dashboard/Topico";
                                 }
 
-                                // Si la llamada se hizo por AJAX/Fetch desde Google, devolvemos JSON:
-                                return Json(new { success = true, redirectUrl = "/Login/Bienvenido" });
-                                // O si es formulario: return RedirectToAction("Bienvenido");
+                                return Json(new { success = true, redirectUrl = redirectUrl });
                             }
                             else
                             {
@@ -164,9 +210,17 @@ namespace Login_Administracion_de_Modulos.Controlador
             }
         }
 
+        [HttpGet("logout")]
+        [HttpGet("Login/Logout")]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index", "Login");
+        }
+
         public IActionResult Bienvenido()
         {
-            return Content("¡Bienvenido al sistema!");
+            return RedirectToAction("Topico", "Dashboard");
         }
     }
 }

@@ -1,0 +1,224 @@
+@{
+    // Si la petición NO es parcial (ingreso directo por URL), usar el layout del dashboard
+    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
+    {
+        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
+    }
+}
+
+<div class="page-header" style="margin-bottom: 1.5rem;">
+    <h1>Módulo 05: Atención Clínica - Tópico</h1>
+    <p>Formulario de registro de atención y evaluación clínica de alumnos y personal</p>
+    <div class="header-accent"></div>
+</div>
+
+<!-- Formulario con HTML estándar y elementos nativos (Sin diseño complejo) -->
+<form id="formAtencionClinica" method="post" onsubmit="event.preventDefault(); guardarAtencionClinica();">
+
+    <!-- I. IDENTIFICACIÓN DEL PACIENTE -->
+    <fieldset style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #4b5563; border-radius: 6px;">
+        <legend style="padding: 0 0.5rem; font-weight: bold; color: #00f2fe;">
+            🪪 I. IDENTIFICACIÓN DEL PACIENTE
+        </legend>
+        
+        <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <label for="buscarDni" style="font-weight: 600;">BUSCAR DNI:</label>
+            <input type="text" id="buscarDni" name="buscarDni" placeholder="Ingrese DNI..." maxlength="20" style="padding: 6px 10px;" />
+            <button type="button" id="btnBuscarDni" onclick="buscarPacienteDni()" style="padding: 6px 14px; cursor: pointer;">
+                🔍 Buscar
+            </button>
+            <span id="dniStatus" style="font-size: 0.85rem; color: #00f2fe;"></span>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label for="apellidosNombres" style="display: block; margin-bottom: 4px; font-weight: 600;">APELLIDOS Y NOMBRES:</label>
+            <input type="text" id="apellidosNombres" name="apellidosNombres" placeholder="- - -" readonly style="width: 100%; max-width: 450px; padding: 6px 10px;" />
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label for="carreraPrograma" style="display: block; margin-bottom: 4px; font-weight: 600;">CARRERA / PROGRAMA:</label>
+            <input type="text" id="carreraPrograma" name="carreraPrograma" placeholder="- - -" readonly style="width: 100%; max-width: 450px; padding: 6px 10px;" />
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label for="cicloTurno" style="display: block; margin-bottom: 4px; font-weight: 600;">CICLO / TURNO:</label>
+            <input type="text" id="cicloTurno" name="cicloTurno" placeholder="- - -" readonly style="width: 100%; max-width: 300px; padding: 6px 10px;" />
+        </div>
+    </fieldset>
+
+    <!-- II. REGISTRO DE ATENCIÓN CLÍNICA -->
+    <fieldset style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #4b5563; border-radius: 6px;">
+        <legend style="padding: 0 0.5rem; font-weight: bold; color: #00f2fe;">
+            🩺 II. REGISTRO DE ATENCIÓN CLÍNICA
+        </legend>
+        
+        <div style="margin-bottom: 1rem;">
+            <label for="fechaHora" style="display: block; margin-bottom: 4px; font-weight: 600;">FECHA Y HORA:</label>
+            <input type="datetime-local" id="fechaHora" name="fechaHora" style="padding: 6px 10px;" />
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label for="tipoSeguroSalud" style="display: block; margin-bottom: 4px; font-weight: 600;">TIPO SEGURO SALUD:</label>
+            <select id="tipoSeguroSalud" name="tipoSeguroSalud" style="padding: 6px 10px;">
+                <option value="Ninguno">Ninguno detectado</option>
+                <option value="EsSalud">EsSalud</option>
+                <option value="SIS">SIS</option>
+                <option value="Privado">Seguro Privado / EPS</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 600;">ALERGIAS:</label>
+            <div style="margin-bottom: 6px;">
+                <input type="checkbox" id="reportaAlergias" name="reportaAlergias" value="true" onchange="toggleAlergias(this)" />
+                <label for="reportaAlergias" style="color: #f87171; font-weight: 500;">⚠️ Paciente reporta alergias</label>
+            </div>
+            <div>
+                <input type="text" id="especificarAlergias" name="especificarAlergias" placeholder="Especificar alergias..." style="width: 100%; max-width: 450px; padding: 6px 10px;" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label for="motivoAtencion" style="display: block; margin-bottom: 4px; font-weight: 600;">MOTIVO DE ATENCIÓN *:</label>
+            <textarea id="motivoAtencion" name="motivoAtencion" rows="3" required placeholder="Cefalea, contusión, dolor estomacal..." style="width: 100%; max-width: 600px; padding: 8px;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label for="medicamentosAdministrados" style="display: block; margin-bottom: 4px; font-weight: 600;">MEDICAMENTOS ADMINISTRADOS:</label>
+            <textarea id="medicamentosAdministrados" name="medicamentosAdministrados" rows="3" placeholder="Paracetamol 500mg, etc..." style="width: 100%; max-width: 600px; padding: 8px;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label for="observacionesTratamiento" style="display: block; margin-bottom: 4px; font-weight: 600;">OBSERVACIONES / TRATAMIENTO:</label>
+            <textarea id="observacionesTratamiento" name="observacionesTratamiento" rows="3" placeholder="Reposo por 30 mins..." style="width: 100%; max-width: 600px; padding: 8px;"></textarea>
+        </div>
+    </fieldset>
+
+    <!-- Botones de Acción -->
+    <div style="display: flex; gap: 12px; align-items: center;">
+        <button type="reset" id="btnLimpiar" onclick="limpiarFormulario()" style="padding: 8px 18px; cursor: pointer;">
+            Limpiar
+        </button>
+        <button type="submit" id="btnGuardar" style="padding: 8px 20px; cursor: pointer; font-weight: bold; background-color: #0284c7; color: #fff; border: 1px solid #0369a1; border-radius: 4px;">
+            💾 Guardar Atención
+        </button>
+    </div>
+
+    <!-- Mensaje de estado -->
+    <div id="resultadoAtencion" style="margin-top: 15px; font-weight: 600;"></div>
+</form>
+
+<script>
+    // Establecer fecha y hora actual automáticamente
+    (function initFechaHora() {
+        const inputFecha = document.getElementById('fechaHora');
+        if (inputFecha && !inputFecha.value) {
+            const now = new Date();
+            const tzOffset = now.getTimezoneOffset() * 60000;
+            inputFecha.value = (new Date(now - tzOffset)).toISOString().slice(0, 16);
+        }
+    })();
+
+    function toggleAlergias(chk) {
+        const inputAlergias = document.getElementById('especificarAlergias');
+        if (inputAlergias) {
+            if (chk.checked) {
+                inputAlergias.focus();
+            }
+        }
+    }
+
+    // Búsqueda en la tabla personas de la Base de Datos
+    function buscarPacienteDni() {
+        const dniInput = document.getElementById('buscarDni');
+        const statusSpan = document.getElementById('dniStatus');
+        const dni = dniInput ? dniInput.value.trim() : '';
+
+        if (!dni) {
+            alert('Por favor ingrese el número de DNI a buscar.');
+            if (dniInput) dniInput.focus();
+            return;
+        }
+
+        if (statusSpan) statusSpan.textContent = 'Buscando paciente en BD...';
+
+        fetch('/Modulo05/AtencionClinica/BuscarPaciente?dni=' + encodeURIComponent(dni))
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (statusSpan) {
+                        statusSpan.style.color = '#10b981';
+                        statusSpan.textContent = '✓ Paciente encontrado';
+                    }
+                    const nomInput = document.getElementById('apellidosNombres');
+                    const carInput = document.getElementById('carreraPrograma');
+                    const cicInput = document.getElementById('cicloTurno');
+
+                    if (nomInput) nomInput.value = (data.apellidos + ' ' + data.nombres).trim();
+                    if (carInput) carInput.value = data.carrera || 'Computación e Informática';
+                    if (cicInput) cicInput.value = data.cicloTurno || 'IV Ciclo / Turno Noche';
+                } else {
+                    if (statusSpan) {
+                        statusSpan.style.color = '#f87171';
+                        statusSpan.textContent = '✗ ' + (data.message || 'No encontrado');
+                    }
+                }
+            })
+            .catch(err => {
+                if (statusSpan) {
+                    statusSpan.style.color = '#f87171';
+                    statusSpan.textContent = 'Error al consultar DNI';
+                }
+            });
+    }
+
+    // Guardado de atención clínica vía AJAX
+    function guardarAtencionClinica() {
+        const form = document.getElementById('formAtencionClinica');
+        const motivo = document.getElementById('motivoAtencion');
+        const resultadoDiv = document.getElementById('resultadoAtencion');
+
+        if (!motivo || !motivo.value.trim()) {
+            alert('El campo "MOTIVO DE ATENCIÓN" es obligatorio.');
+            if (motivo) motivo.focus();
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        fetch('/Modulo05/AtencionClinica/GuardarAtencion', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (resultadoDiv) {
+                    resultadoDiv.style.color = '#10b981';
+                    resultadoDiv.textContent = '✓ ' + data.message;
+                }
+                alert(data.message || 'Atención registrada con éxito');
+                form.reset();
+                initFechaHora();
+            } else {
+                if (resultadoDiv) {
+                    resultadoDiv.style.color = '#f87171';
+                    resultadoDiv.textContent = '✗ ' + data.message;
+                }
+            }
+        })
+        .catch(err => {
+            if (resultadoDiv) {
+                resultadoDiv.style.color = '#f87171';
+                resultadoDiv.textContent = 'Error de conexión: ' + err.message;
+            }
+        });
+    }
+
+    function limpiarFormulario() {
+        const statusSpan = document.getElementById('dniStatus');
+        const resultadoDiv = document.getElementById('resultadoAtencion');
+        if (statusSpan) statusSpan.textContent = '';
+        if (resultadoDiv) resultadoDiv.textContent = '';
+    }
+</script>

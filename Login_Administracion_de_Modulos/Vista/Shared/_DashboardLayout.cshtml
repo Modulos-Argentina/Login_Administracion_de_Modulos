@@ -15,10 +15,12 @@
             <i class="ph-fill ph-graduation-cap"></i>
         </div>
         <div class="header-actions">
-            <div class="profile-avatar-small">RF</div>
-            <button class="btn-icon">
+            <div class="profile-avatar-small">
+                @(ViewBag.UserInitials ?? "RF")
+            </div>
+            <a href="/logout" class="btn-icon" title="Cerrar Sesión">
                 <i class="ph ph-sign-out"></i>
-            </button>
+            </a>
         </div>
     </header>
 
@@ -27,12 +29,12 @@
         <aside class="sidebar">
             <div class="sidebar-profile">
                 <div class="profile-avatar-large">
-                    RF
+                    @(ViewBag.UserInitials ?? "RF")
                     <span class="online-dot"></span>
                 </div>
                 <div class="profile-info">
-                    <h4>Lic. Rosa Fernández</h4>
-                    <p>@ViewData["Role"]</p>
+                    <h4>@(ViewBag.UserName ?? "Lic. Rosa Fernández")</h4>
+                    <p>@(ViewBag.UserRole ?? ViewData["Role"] ?? "Enfermería (Tópico)")</p>
                 </div>
             </div>
 
@@ -41,7 +43,7 @@
             </nav>
 
             <div class="sidebar-footer">
-                <a href="/Index" class="btn-logout">
+                <a href="/logout" class="btn-logout">
                     <i class="ph ph-sign-out"></i>
                     Cerrar Sesión
                 </a>
@@ -49,9 +51,11 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="main-content">
+        <main class="main-content" id="main-content-container">
             @RenderBody()
         </main>
     </div>
+
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
