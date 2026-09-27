@@ -130,14 +130,44 @@ namespace Login_Administracion_de_Modulos.Controlador
         // ==========================================
         // RUTA 2: SSO con Google (Sin contraseña)
         // ==========================================
-        [HttpPost("login-google")]
-        public IActionResult LoginGoogle(string correo)
+        [HttpGet("login-google-oauth")]
+        public IActionResult LoginGoogleOAuth()
+        {
+            var properties = new Microsoft.AspNetCore.Authentication.AuthenticationProperties { RedirectUri = Url.Action("GoogleResponse") };
+            return Challenge(properties, Microsoft.AspNetCore.Authentication.Google.GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet("google-response")]
+        public async System.Threading.Tasks.Task<IActionResult> GoogleResponse()
+        {
+            var result = await HttpContext.AuthenticateAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+            
+            if (!result.Succeeded)
+            {
+                ViewBag.Error = "No se pudo autenticar con Google.";
+                return View("~/Vista/Index.cshtml");
+            }
+
+            var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
+            var correo = claims?.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(correo))
+            {
+                ViewBag.Error = "No se pudo obtener el correo de Google.";
+                return View("~/Vista/Index.cshtml");
+            }
+
+            return ProcessGoogleLogin(correo);
+        }
+
+        private IActionResult ProcessGoogleLogin(string correo)
         {
             string? connectionString = _configuration.GetConnectionString("DefaultConnection");
 
             if (string.IsNullOrEmpty(connectionString))
             {
-                return Json(new { success = false, message = "Error de configuración." });
+                ViewBag.Error = "Error de configuración.";
+                return View("~/Vista/Index.cshtml");
             }
 
             try
@@ -194,11 +224,12 @@ namespace Login_Administracion_de_Modulos.Controlador
                                     redirectUrl = "/Dashboard/Topico";
                                 }
 
-                                return Json(new { success = true, redirectUrl = redirectUrl });
+                                return Redirect(redirectUrl);
                             }
                             else
                             {
-                                return Json(new { success = false, message = "Correo no pertenece a la institución o usuario inactivo." });
+                                ViewBag.Error = "Correo no pertenece a la institución o usuario inactivo.";
+                                return View("~/Vista/Index.cshtml");
                             }
                         }
                     }
@@ -206,7 +237,8 @@ namespace Login_Administracion_de_Modulos.Controlador
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error de conexión: " + ex.Message });
+                ViewBag.Error = "Error de conexión: " + ex.Message;
+                return View("~/Vista/Index.cshtml");
             }
         }
 
