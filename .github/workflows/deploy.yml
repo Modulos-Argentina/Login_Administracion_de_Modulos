@@ -1,12 +1,18 @@
 name: Desplegar ASP.NET a MonsterASP
 
 on:
+  # 1. Permite presionar un botón manual en GitHub Actions para desplegar
+  workflow_dispatch:
+
+  # 2. Se activa con push a master SOLO SI el commit lleva la palabra [deploy]
   push:
     branches:
       - master
 
 jobs:
   compilar_y_subir:
+    # Condición mágica: Solo corre si le diste al botón manual O si el commit dice [deploy]
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy]')
     runs-on: ubuntu-latest
 
     steps:
@@ -21,13 +27,14 @@ jobs:
       - name: 3. Compilar el proyecto (Publish)
         run: dotnet publish -c Release -o ./publish_output
 
-      # 4. Creamos app_offline.htm para que el servidor libere los .dll
-      - name: 4. Detener temporalmente el sitio en el servidor
+      # 4. Apagamos el sitio y esperamos 5 segundos para que Windows suelte la .dll
+      - name: 4. Apagar sitio web temporalmente
         run: |
-          echo "<html><head><meta charset='utf-8'></head><body><h2>Actualizando sistema... espere unos segundos.</h2></body></html>" > app_offline.htm
+          echo "<html><head><meta charset='utf-8'></head><body><h2>Actualizando... vuelva en 1 minuto.</h2></body></html>" > app_offline.htm
           curl -k -T app_offline.htm -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" "ftp://${{ secrets.FTP_SERVER }}/wwwroot/app_offline.htm" || true
+          sleep 5
 
-      # 5. Sube los archivos nuevos (ahora el .dll ya no está bloqueado)
+      # 5. Subir los archivos nuevos al hosting
       - name: 5. Sincronizar archivos por FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -39,7 +46,7 @@ jobs:
           server-dir: /wwwroot/
 
       # 6. Borramos app_offline.htm para que el servidor vuelva a encender con los cambios
-      - name: 6. Reactivar el sitio web
+      - name: 6. Encender el sitio web
         if: always()
         run: |
           curl -k -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" "ftp://${{ secrets.FTP_SERVER }}/" -Q "-DELE /wwwroot/app_offline.htm" || true
