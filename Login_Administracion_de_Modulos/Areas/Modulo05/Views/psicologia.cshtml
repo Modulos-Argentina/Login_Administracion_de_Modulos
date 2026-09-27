@@ -1,112 +1,103 @@
-@*
-    Módulo 05: Psicología - Bienestar Estudiantil
-    Vista del Formulario de Atención y Consulta Psicológica
-    ASP.NET Core Razor (.NET 10)
-*@
 @{
-    Layout = null;
+    // Si la petición NO es parcial, usar el layout del dashboard
+    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
+    {
+        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
+    }
+    ViewData["Title"] = "Psicología";
+    ViewData["Role"] = "Bienestar Estudiantil";
 }
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Psicología - ISTP Argentina</title>
-</head>
-<body>
+@section SidebarNav {
+    <a href="/Dashboard/Psicologia" class="nav-item active">
+        <i class="ph ph-brain"></i>
+        Atención Psicológica
+    </a>
+    <a href="#" class="nav-item">
+        <i class="ph ph-users"></i>
+        Citas Programadas
+    </a>
+    <a href="#" class="nav-item">
+        <i class="ph ph-file-text"></i>
+        Historial Clínico
+    </a>
+}
 
-    <!-- Encabezado / Barra Superior -->
-    <header>
-        <div>
-            <h1>ISTP ARGENTINA.</h1>
-            <span>Psicología</span>
+<div class="page-header" style="margin-bottom: 1.5rem;">
+    <h1>Módulo 05: Psicología</h1>
+    <p>Formulario de Atención y Consulta Psicológica</p>
+    <div class="header-accent"></div>
+</div>
+
+<form method="post" action="">
+
+    <!-- I. IDENTIFICACIÓN DEL ESTUDIANTE -->
+    <fieldset style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #4b5563; border-radius: 6px;">
+        <legend style="padding: 0 0.5rem; font-weight: bold; color: #00f2fe;">I. IDENTIFICACIÓN DEL ESTUDIANTE</legend>
+
+        <div style="margin-bottom: 1rem;">
+            <label for="dniBusqueda" style="font-weight: 600;">BUSCAR ALUMNO (DNI):</label>
+            <input type="text" id="dniBusqueda" name="dniBusqueda" placeholder="DNI..." maxlength="8" style="padding: 6px 10px;" />
+            <button type="button" id="btnBuscarAlumno" style="padding: 6px 14px; cursor: pointer;">🔍 Buscar</button>
         </div>
-        <div>
-            <span>PostgreSQL: Online</span>
-            <div>
-                <span>Lic. Andrea (Psicología)</span>
-                <small>PSICOLOGIA</small>
-            </div>
-            <button type="button" title="Cerrar sesión">Salir</button>
+
+        <div style="margin-bottom: 1rem;">
+            <label for="apellidosNombres" style="display: block; margin-bottom: 4px; font-weight: 600;">APELLIDOS Y NOMBRES</label>
+            <input type="text" id="apellidosNombres" name="apellidosNombres" placeholder="- - -" readonly style="width: 100%; max-width: 450px; padding: 6px 10px;" />
         </div>
-    </header>
 
-    <!-- Contenido Principal: Formulario de Psicología -->
-    <main>
-        <form method="post" action="">
+        <div style="margin-bottom: 1rem;">
+            <label for="carreraPrograma" style="display: block; margin-bottom: 4px; font-weight: 600;">CARRERA / PROGRAMA</label>
+            <input type="text" id="carreraPrograma" name="carreraPrograma" placeholder="- - -" readonly style="width: 100%; max-width: 450px; padding: 6px 10px;" />
+        </div>
 
-            <!-- I. IDENTIFICACIÓN DEL ESTUDIANTE -->
-            <fieldset>
-                <legend>I. IDENTIFICACIÓN DEL ESTUDIANTE</legend>
+        <div style="margin-bottom: 1rem;">
+            <label for="cicloTurno" style="display: block; margin-bottom: 4px; font-weight: 600;">CICLO / TURNO</label>
+            <input type="text" id="cicloTurno" name="cicloTurno" placeholder="- - -" readonly style="width: 100%; max-width: 300px; padding: 6px 10px;" />
+        </div>
+    </fieldset>
 
-                <div>
-                    <label for="dniBusqueda">BUSCAR ALUMNO (DNI)</label>
-                    <input type="text" id="dniBusqueda" name="dniBusqueda" placeholder="DNI..." maxlength="8" />
-                    <button type="button" id="btnBuscarAlumno">Buscar</button>
-                </div>
+    <!-- II. CREACIÓN DE EXPEDIENTE / CONSULTA ACTUAL -->
+    <fieldset style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #4b5563; border-radius: 6px;">
+        <legend style="padding: 0 0.5rem; font-weight: bold; color: #00f2fe;">II. CREACIÓN DE EXPEDIENTE / CONSULTA ACTUAL</legend>
 
-                <div>
-                    <label for="apellidosNombres">APELLIDOS Y NOMBRES</label>
-                    <input type="text" id="apellidosNombres" name="apellidosNombres" placeholder="- - -" readonly />
-                </div>
+        <div style="margin-bottom: 1rem;">
+            <label for="fechaHora" style="display: block; margin-bottom: 4px; font-weight: 600;">FECHA Y HORA</label>
+            <input type="datetime-local" id="fechaHora" name="fechaHora" value="2026-09-26T19:30" style="padding: 6px 10px;" />
+        </div>
 
-                <div>
-                    <label for="carreraPrograma">CARRERA / PROGRAMA</label>
-                    <input type="text" id="carreraPrograma" name="carreraPrograma" placeholder="- - -" readonly />
-                </div>
+        <div style="margin-bottom: 1rem;">
+            <label for="estadoClinico" style="display: block; margin-bottom: 4px; font-weight: 600;">ESTADO CLÍNICO *</label>
+            <select id="estadoClinico" name="estadoClinico" required style="padding: 6px 10px; width: 100%; max-width: 450px;">
+                <option value="Pendiente — Evaluación Inicial" selected>Pendiente — Evaluación Inicial</option>
+                <option value="En Proceso — En Terapia / Seguimiento">En Proceso — En Terapia / Seguimiento</option>
+                <option value="Derivado — Especialista Externo">Derivado — Especialista Externo</option>
+                <option value="Alta — Tratamiento Concluido">Alta — Tratamiento Concluido</option>
+                <option value="Cancelado / Inasistencia">Cancelado / Inasistencia</option>
+            </select>
+        </div>
 
-                <div>
-                    <label for="cicloTurno">CICLO / TURNO</label>
-                    <input type="text" id="cicloTurno" name="cicloTurno" placeholder="- - -" readonly />
-                </div>
-            </fieldset>
+        <div style="margin-bottom: 1rem;">
+            <label for="motivoConsulta" style="display: block; margin-bottom: 4px; font-weight: 600;">MOTIVO DE CONSULTA Y CONTEXTO ACADÉMICO / FAMILIAR</label>
+            <textarea id="motivoConsulta" name="motivoConsulta" rows="4" placeholder="Síntomas referidos o razones de bajo rendimiento..." style="width: 100%; max-width: 600px; padding: 8px;"></textarea>
+        </div>
+    </fieldset>
 
-            <!-- II. CREACIÓN DE EXPEDIENTE / CONSULTA ACTUAL -->
-            <fieldset>
-                <legend>II. CREACIÓN DE EXPEDIENTE / CONSULTA ACTUAL</legend>
+    <!-- DIAGNÓSTICO PRELIMINAR Y NOTAS CONFIDENCIALES DE TERAPIA -->
+    <fieldset style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #4b5563; border-radius: 6px;">
+        <legend style="padding: 0 0.5rem; font-weight: bold; color: #00f2fe;">DIAGNÓSTICO PRELIMINAR Y NOTAS CONFIDENCIALES DE TERAPIA</legend>
 
-                <div>
-                    <label for="fechaHora">FECHA Y HORA</label>
-                    <input type="datetime-local" id="fechaHora" name="fechaHora" value="2026-09-26T19:30" />
-                </div>
+        <div>
+            <p style="color: #f87171; font-weight: 500;">⚠️ NOTAS BAJO SECRETO PROFESIONAL</p>
+            <label for="diagnosticoNotas" style="display: block; margin-bottom: 4px; font-weight: 600;">Notas de Terapia:</label>
+            <textarea id="diagnosticoNotas" name="diagnosticoNotas" rows="6" placeholder="Evaluación HTP, Test Vocacional, Notas bajo secreto profesional..." style="width: 100%; max-width: 600px; padding: 8px;"></textarea>
+        </div>
+    </fieldset>
 
-                <div>
-                    <label for="estadoClinico">ESTADO CLÍNICO *</label>
-                    <select id="estadoClinico" name="estadoClinico" required>
-                        <option value="Pendiente — Evaluación Inicial" selected>Pendiente — Evaluación Inicial</option>
-                        <option value="En Proceso — En Terapia / Seguimiento">En Proceso — En Terapia / Seguimiento</option>
-                        <option value="Derivado — Especialista Externo">Derivado — Especialista Externo</option>
-                        <option value="Alta — Tratamiento Concluido">Alta — Tratamiento Concluido</option>
-                        <option value="Cancelado / Inasistencia">Cancelado / Inasistencia</option>
-                    </select>
-                </div>
+    <!-- Botones de Acción -->
+    <div style="display: flex; gap: 12px; align-items: center;">
+        <button type="reset" id="btnLimpiar" style="padding: 8px 18px; cursor: pointer;">Limpiar</button>
+        <button type="submit" id="btnGuardar" style="padding: 8px 20px; cursor: pointer; font-weight: bold; background-color: #0284c7; color: #fff; border: 1px solid #0369a1; border-radius: 4px;">💾 Guardar Sesión</button>
+    </div>
 
-                <div>
-                    <label for="motivoConsulta">MOTIVO DE CONSULTA Y CONTEXTO ACADÉMICO / FAMILIAR</label>
-                    <textarea id="motivoConsulta" name="motivoConsulta" rows="4" cols="50" placeholder="Síntomas referidos o razones de bajo rendimiento..."></textarea>
-                </div>
-            </fieldset>
-
-            <!-- DIAGNÓSTICO PRELIMINAR Y NOTAS CONFIDENCIALES DE TERAPIA -->
-            <fieldset>
-                <legend>DIAGNÓSTICO PRELIMINAR Y NOTAS CONFIDENCIALES DE TERAPIA</legend>
-
-                <div>
-                    <p><strong>NOTAS BAJO SECRETO PROFESIONAL</strong></p>
-                    <label for="diagnosticoNotas">Notas de Terapia:</label>
-                    <textarea id="diagnosticoNotas" name="diagnosticoNotas" rows="6" cols="50" placeholder="Evaluación HTP, Test Vocacional, Notas bajo secreto profesional..."></textarea>
-                </div>
-            </fieldset>
-
-            <!-- Botones de Acción -->
-            <div>
-                <button type="reset" id="btnLimpiar">Limpiar</button>
-                <button type="submit" id="btnGuardar">Guardar Sesión</button>
-            </div>
-
-        </form>
-    </main>
-
-</body>
-</html>
+</form>
