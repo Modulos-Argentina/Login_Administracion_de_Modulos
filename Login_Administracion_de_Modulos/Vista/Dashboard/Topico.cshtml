@@ -134,7 +134,36 @@
             <div class="header-accent"></div>
         </div>
         <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 2rem;">
-            <p style="color: var(--text-secondary);">Puede consultar los registros anteriores o ingresar una nueva atención desde el menú lateral.</p>
+            <div style="margin-bottom: 2rem;">
+                <label for="dniHistorial" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #e5e7eb;">BUSCAR HISTORIAL POR DNI:</label>
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="dniHistorial" name="dniHistorial" placeholder="Ingrese DNI..." maxlength="20" style="padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(15, 15, 20, 0.8); color: #fff; width: 100%; max-width: 300px;" />
+                    <button type="button" onclick="cargarHistorialTopico()" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="ph-bold ph-magnifying-glass"></i> Buscar Historial
+                    </button>
+                    <span id="historialStatus" style="font-size: 0.9rem; font-weight: 500;"></span>
+                </div>
+            </div>
+
+            <div id="historialResultados" style="display: none;">
+                <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #fff;">Registros de Atención</h3>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-secondary);">
+                                <th style="padding: 12px 10px;">Fecha y Hora</th>
+                                <th style="padding: 12px 10px;">Motivo</th>
+                                <th style="padding: 12px 10px;">Seguro</th>
+                                <th style="padding: 12px 10px;">Alergias</th>
+                                <th style="padding: 12px 10px;">Observación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historialTableBody">
+                            <!-- Filas dinámicas -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -214,6 +243,71 @@
             document.getElementById('view-dashboard').style.display = 'none';
             document.getElementById('view-atencion-container').style.display = 'none';
             document.getElementById('view-historial-container').style.display = 'block';
+        }
+
+        function cargarHistorialTopico() {
+            const dniInput = document.getElementById('dniHistorial');
+            const statusSpan = document.getElementById('historialStatus');
+            const resultDiv = document.getElementById('historialResultados');
+            const tableBody = document.getElementById('historialTableBody');
+            const dni = dniInput ? dniInput.value.trim() : '';
+
+            if (!dni) {
+                alert('Ingrese el DNI para buscar su historial.');
+                return;
+            }
+
+            if (statusSpan) {
+                statusSpan.style.color = 'var(--text-muted)';
+                statusSpan.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Buscando...';
+            }
+            resultDiv.style.display = 'none';
+
+            fetch('/Modulo05/AtencionClinica/Historial?dni=' + encodeURIComponent(dni))
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.data && data.data.length > 0) {
+                            if (statusSpan) {
+                                statusSpan.style.color = '#10b981';
+                                statusSpan.innerHTML = '<i class="ph-bold ph-check-circle"></i> ' + data.data.length + ' registro(s) encontrado(s)';
+                            }
+                            tableBody.innerHTML = '';
+                            data.data.forEach(item => {
+                                const tr = document.createElement('tr');
+                                tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                                
+                                const alergiasText = item.esAlergico ? '<span style="color:#ef4444;">Sí: ' + item.detalleAlergia + '</span>' : 'No';
+                                
+                                tr.innerHTML = `
+                                    <td style="padding: 12px 10px;">${item.fechaHora}</td>
+                                    <td style="padding: 12px 10px; font-weight: 500;">${item.motivo}</td>
+                                    <td style="padding: 12px 10px;">${item.seguroSalud}</td>
+                                    <td style="padding: 12px 10px;">${alergiasText}</td>
+                                    <td style="padding: 12px 10px; color: var(--text-secondary); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.observacion}">${item.observacion || '-'}</td>
+                                `;
+                                tableBody.appendChild(tr);
+                            });
+                            resultDiv.style.display = 'block';
+                        } else {
+                            if (statusSpan) {
+                                statusSpan.style.color = '#f59e0b';
+                                statusSpan.innerHTML = '<i class="ph-bold ph-info"></i> No se encontraron atenciones previas';
+                            }
+                        }
+                    } else {
+                        if (statusSpan) {
+                            statusSpan.style.color = '#ef4444';
+                            statusSpan.innerHTML = '<i class="ph-bold ph-warning"></i> ' + data.message;
+                        }
+                    }
+                })
+                .catch(err => {
+                    if (statusSpan) {
+                        statusSpan.style.color = '#ef4444';
+                        statusSpan.innerHTML = '<i class="ph-bold ph-warning"></i> Error de conexión';
+                    }
+                });
         }
     </script>
 }

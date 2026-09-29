@@ -6,106 +6,305 @@
     }
 }
 
-<div class="page-header" style="margin-bottom: 1.5rem;">
+<style>
+    /* Premium Aesthetic CSS for Atencion Clinica Module */
+    :root {
+        --primary-clinic: #0284c7; /* Cyan/Blue */
+        --secondary-clinic: #0ea5e9; /* Light Blue */
+        --dark-card: #1e1e2d;
+        --dark-bg: #151521;
+        --border-glass: rgba(255, 255, 255, 0.1);
+        --text-muted: #9ca3af;
+        --text-bright: #f3f4f6;
+    }
+
+    .clinic-header {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .clinic-header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, var(--primary-clinic), var(--secondary-clinic));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .clinic-header p {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    .clinic-form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .clinic-fieldset {
+        background: rgba(30, 30, 45, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .clinic-fieldset:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        border-color: rgba(2, 132, 199, 0.3);
+    }
+
+    .clinic-legend {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(90deg, var(--primary-clinic), var(--secondary-clinic));
+        padding: 0.4rem 1.2rem;
+        border-radius: 8px;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+    }
+
+    .clinic-form-group {
+        margin-bottom: 1.2rem;
+        position: relative;
+    }
+
+    .clinic-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #e5e7eb;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .clinic-input, .clinic-select, .clinic-textarea {
+        width: 100%;
+        background: rgba(15, 15, 20, 0.8);
+        border: 1px solid var(--border-glass);
+        color: #fff;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .clinic-input:focus, .clinic-select:focus, .clinic-textarea:focus {
+        outline: none;
+        border-color: var(--primary-clinic);
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+    }
+
+    .clinic-input::placeholder, .clinic-textarea::placeholder {
+        color: #6b7280;
+    }
+
+    .clinic-input[readonly] {
+        background: rgba(255, 255, 255, 0.03);
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+
+    .clinic-btn-search {
+        background: linear-gradient(135deg, var(--primary-clinic), #0369a1);
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+    }
+
+    .clinic-btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(2, 132, 199, 0.5);
+    }
+
+    .clinic-btn-save {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 0.9rem 2rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .clinic-btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .clinic-btn-reset {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid var(--border-glass);
+        padding: 0.9rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .clinic-btn-reset:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .clinic-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+        justify-content: flex-end;
+    }
+
+    .clinic-search-group {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .clinic-status-msg {
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+    .clinic-warning {
+        color: #fca5a5;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="clinic-header">
     <h1>Módulo 05: Atención Clínica - Tópico</h1>
     <p>Formulario de registro de atención y evaluación clínica de alumnos y personal</p>
-    <div class="header-accent"></div>
 </div>
 
-<!-- Formulario con HTML estándar y elementos nativos (Sin diseño complejo) -->
-<form id="formAtencionClinica" method="post" onsubmit="event.preventDefault(); guardarAtencionClinica();">
+<!-- Formulario con diseño mejorado -->
+<form id="formAtencionClinica" method="post" onsubmit="event.preventDefault(); guardarAtencionClinica();" class="clinic-form-container">
 
     <!-- I. IDENTIFICACIÓN DEL PACIENTE -->
-    <fieldset style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #4b5563; border-radius: 6px;">
-        <legend style="padding: 0 0.5rem; font-weight: bold; color: #00f2fe;">
-            🪪 I. IDENTIFICACIÓN DEL PACIENTE
-        </legend>
+    <div class="clinic-fieldset">
+        <div class="clinic-legend">
+            <i class="ph-bold ph-identification-badge"></i> I. IDENTIFICACIÓN DEL PACIENTE
+        </div>
         
-        <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <label for="buscarDni" style="font-weight: 600;">BUSCAR DNI:</label>
-            <input type="text" id="buscarDni" name="buscarDni" placeholder="Ingrese DNI..." maxlength="20" style="padding: 6px 10px;" />
-            <button type="button" id="btnBuscarDni" onclick="buscarPacienteDni()" style="padding: 6px 14px; cursor: pointer;">
-                🔍 Buscar
-            </button>
-            <span id="dniStatus" style="font-size: 0.85rem; color: #00f2fe;"></span>
+        <div class="clinic-form-group">
+            <label for="buscarDni" class="clinic-label">BUSCAR DNI:</label>
+            <div class="clinic-search-group">
+                <input type="text" id="buscarDni" name="buscarDni" class="clinic-input" placeholder="Ingrese DNI..." maxlength="20" style="max-width: 300px;" />
+                <button type="button" id="btnBuscarDni" class="clinic-btn-search" onclick="buscarPacienteDni()">
+                    <i class="ph-bold ph-magnifying-glass"></i> Buscar
+                </button>
+                <span id="dniStatus" class="clinic-status-msg"></span>
+            </div>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-            <label for="apellidosNombres" style="display: block; margin-bottom: 4px; font-weight: 600;">APELLIDOS Y NOMBRES:</label>
-            <input type="text" id="apellidosNombres" name="apellidosNombres" placeholder="- - -" readonly style="width: 100%; max-width: 450px; padding: 6px 10px;" />
-        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            <div class="clinic-form-group">
+                <label for="apellidosNombres" class="clinic-label">APELLIDOS Y NOMBRES:</label>
+                <input type="text" id="apellidosNombres" name="apellidosNombres" class="clinic-input" placeholder="- - -" readonly />
+            </div>
 
-        <div style="margin-bottom: 1rem;">
-            <label for="carreraPrograma" style="display: block; margin-bottom: 4px; font-weight: 600;">CARRERA / PROGRAMA:</label>
-            <input type="text" id="carreraPrograma" name="carreraPrograma" placeholder="- - -" readonly style="width: 100%; max-width: 450px; padding: 6px 10px;" />
-        </div>
+            <div class="clinic-form-group">
+                <label for="carreraPrograma" class="clinic-label">CARRERA / PROGRAMA:</label>
+                <input type="text" id="carreraPrograma" name="carreraPrograma" class="clinic-input" placeholder="- - -" readonly />
+            </div>
 
-        <div style="margin-bottom: 1rem;">
-            <label for="cicloTurno" style="display: block; margin-bottom: 4px; font-weight: 600;">CICLO / TURNO:</label>
-            <input type="text" id="cicloTurno" name="cicloTurno" placeholder="- - -" readonly style="width: 100%; max-width: 300px; padding: 6px 10px;" />
+            <div class="clinic-form-group">
+                <label for="cicloTurno" class="clinic-label">CICLO / TURNO:</label>
+                <input type="text" id="cicloTurno" name="cicloTurno" class="clinic-input" placeholder="- - -" readonly />
+            </div>
         </div>
-    </fieldset>
+    </div>
 
     <!-- II. REGISTRO DE ATENCIÓN CLÍNICA -->
-    <fieldset style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #4b5563; border-radius: 6px;">
-        <legend style="padding: 0 0.5rem; font-weight: bold; color: #00f2fe;">
-            🩺 II. REGISTRO DE ATENCIÓN CLÍNICA
-        </legend>
+    <div class="clinic-fieldset">
+        <div class="clinic-legend">
+            <i class="ph-bold ph-stethoscope"></i> II. REGISTRO DE ATENCIÓN CLÍNICA
+        </div>
         
-        <div style="margin-bottom: 1rem;">
-            <label for="fechaHora" style="display: block; margin-bottom: 4px; font-weight: 600;">FECHA Y HORA:</label>
-            <input type="datetime-local" id="fechaHora" name="fechaHora" style="padding: 6px 10px;" />
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            <div class="clinic-form-group">
+                <label for="fechaHora" class="clinic-label">FECHA Y HORA:</label>
+                <input type="datetime-local" id="fechaHora" name="fechaHora" class="clinic-input" />
+            </div>
+
+            <div class="clinic-form-group">
+                <label for="tipoSeguroSalud" class="clinic-label">TIPO SEGURO SALUD:</label>
+                <select id="tipoSeguroSalud" name="tipoSeguroSalud" class="clinic-select">
+                    <option value="Ninguno">Ninguno detectado</option>
+                    <option value="EsSalud">EsSalud</option>
+                    <option value="SIS">SIS</option>
+                    <option value="Privado">Seguro Privado / EPS</option>
+                </select>
+            </div>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-            <label for="tipoSeguroSalud" style="display: block; margin-bottom: 4px; font-weight: 600;">TIPO SEGURO SALUD:</label>
-            <select id="tipoSeguroSalud" name="tipoSeguroSalud" style="padding: 6px 10px;">
-                <option value="Ninguno">Ninguno detectado</option>
-                <option value="EsSalud">EsSalud</option>
-                <option value="SIS">SIS</option>
-                <option value="Privado">Seguro Privado / EPS</option>
-            </select>
-        </div>
-
-        <div style="margin-bottom: 1rem;">
-            <label style="display: block; margin-bottom: 4px; font-weight: 600;">ALERGIAS:</label>
-            <div style="margin-bottom: 6px;">
-                <input type="checkbox" id="reportaAlergias" name="reportaAlergias" value="true" onchange="toggleAlergias(this)" />
-                <label for="reportaAlergias" style="color: #f87171; font-weight: 500;">⚠️ Paciente reporta alergias</label>
+        <div class="clinic-form-group">
+            <label class="clinic-label">ALERGIAS:</label>
+            <div class="clinic-warning">
+                <input type="checkbox" id="reportaAlergias" name="reportaAlergias" value="true" onchange="toggleAlergias(this)" style="width: 18px; height: 18px; cursor: pointer; accent-color: #ef4444;" />
+                <label for="reportaAlergias" style="cursor: pointer;">Paciente reporta alergias</label>
             </div>
             <div>
-                <input type="text" id="especificarAlergias" name="especificarAlergias" placeholder="Especificar alergias..." style="width: 100%; max-width: 450px; padding: 6px 10px;" />
+                <input type="text" id="especificarAlergias" name="especificarAlergias" class="clinic-input" placeholder="Especificar alergias si reporta..." />
             </div>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-            <label for="motivoAtencion" style="display: block; margin-bottom: 4px; font-weight: 600;">MOTIVO DE ATENCIÓN *:</label>
-            <textarea id="motivoAtencion" name="motivoAtencion" rows="3" required placeholder="Cefalea, contusión, dolor estomacal..." style="width: 100%; max-width: 600px; padding: 8px;"></textarea>
+        <div class="clinic-form-group">
+            <label for="motivoAtencion" class="clinic-label">MOTIVO DE ATENCIÓN *:</label>
+            <textarea id="motivoAtencion" name="motivoAtencion" class="clinic-textarea" rows="3" required placeholder="Cefalea, contusión, dolor estomacal..."></textarea>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-            <label for="medicamentosAdministrados" style="display: block; margin-bottom: 4px; font-weight: 600;">MEDICAMENTOS ADMINISTRADOS:</label>
-            <textarea id="medicamentosAdministrados" name="medicamentosAdministrados" rows="3" placeholder="Paracetamol 500mg, etc..." style="width: 100%; max-width: 600px; padding: 8px;"></textarea>
+        <div class="clinic-form-group">
+            <label for="medicamentosAdministrados" class="clinic-label">MEDICAMENTOS ADMINISTRADOS:</label>
+            <textarea id="medicamentosAdministrados" name="medicamentosAdministrados" class="clinic-textarea" rows="2" placeholder="Paracetamol 500mg, etc..."></textarea>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-            <label for="observacionesTratamiento" style="display: block; margin-bottom: 4px; font-weight: 600;">OBSERVACIONES / TRATAMIENTO:</label>
-            <textarea id="observacionesTratamiento" name="observacionesTratamiento" rows="3" placeholder="Reposo por 30 mins..." style="width: 100%; max-width: 600px; padding: 8px;"></textarea>
+        <div class="clinic-form-group">
+            <label for="observacionesTratamiento" class="clinic-label">OBSERVACIONES / TRATAMIENTO:</label>
+            <textarea id="observacionesTratamiento" name="observacionesTratamiento" class="clinic-textarea" rows="3" placeholder="Reposo por 30 mins..."></textarea>
         </div>
-    </fieldset>
+    </div>
 
     <!-- Botones de Acción -->
-    <div style="display: flex; gap: 12px; align-items: center;">
-        <button type="reset" id="btnLimpiar" onclick="limpiarFormulario()" style="padding: 8px 18px; cursor: pointer;">
-            Limpiar
+    <div class="clinic-actions">
+        <span id="resultadoAtencion" class="clinic-status-msg" style="margin-right: auto; display: flex; align-items: center;"></span>
+        <button type="reset" id="btnLimpiar" class="clinic-btn-reset" onclick="limpiarFormulario()">
+            <i class="ph-bold ph-arrow-counter-clockwise"></i> Limpiar
         </button>
-        <button type="submit" id="btnGuardar" style="padding: 8px 20px; cursor: pointer; font-weight: bold; background-color: #0284c7; color: #fff; border: 1px solid #0369a1; border-radius: 4px;">
-            💾 Guardar Atención
+        <button type="submit" id="btnGuardar" class="clinic-btn-save">
+            <i class="ph-bold ph-floppy-disk"></i> Guardar Atención
         </button>
     </div>
 
-    <!-- Mensaje de estado -->
-    <div id="resultadoAtencion" style="margin-top: 15px; font-weight: 600;"></div>
 </form>
 
 <script>
@@ -124,6 +323,9 @@
         if (inputAlergias) {
             if (chk.checked) {
                 inputAlergias.focus();
+                inputAlergias.style.borderColor = '#ef4444';
+            } else {
+                inputAlergias.style.borderColor = 'var(--border-glass)';
             }
         }
     }
@@ -140,7 +342,10 @@
             return;
         }
 
-        if (statusSpan) statusSpan.textContent = 'Buscando paciente en BD...';
+        if (statusSpan) {
+            statusSpan.style.color = 'var(--text-muted)';
+            statusSpan.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Buscando en BD...';
+        }
 
         fetch('/Modulo05/AtencionClinica/BuscarPaciente?dni=' + encodeURIComponent(dni))
             .then(res => res.json())
@@ -148,7 +353,7 @@
                 if (data.success) {
                     if (statusSpan) {
                         statusSpan.style.color = '#10b981';
-                        statusSpan.textContent = '✓ Paciente encontrado';
+                        statusSpan.innerHTML = '<i class="ph-bold ph-check-circle"></i> Paciente encontrado';
                     }
                     const nomInput = document.getElementById('apellidosNombres');
                     const carInput = document.getElementById('carreraPrograma');
@@ -160,7 +365,7 @@
                 } else {
                     if (statusSpan) {
                         statusSpan.style.color = '#f87171';
-                        statusSpan.textContent = '✗ ' + (data.message || 'No encontrado');
+                        statusSpan.innerHTML = '<i class="ph-bold ph-x-circle"></i> ' + (data.message || 'No encontrado');
                     }
                 }
             })
@@ -195,16 +400,20 @@
             if (data.success) {
                 if (resultadoDiv) {
                     resultadoDiv.style.color = '#10b981';
-                    resultadoDiv.textContent = '✓ ' + data.message;
+                    resultadoDiv.innerHTML = '<i class="ph-bold ph-check-circle"></i> ' + data.message;
                 }
                 alert(data.message || 'Atención registrada con éxito');
                 form.reset();
-                initFechaHora();
+                const now = new Date();
+                const tzOffset = now.getTimezoneOffset() * 60000;
+                document.getElementById('fechaHora').value = (new Date(now - tzOffset)).toISOString().slice(0, 16);
+                limpiarFormulario();
             } else {
                 if (resultadoDiv) {
                     resultadoDiv.style.color = '#f87171';
-                    resultadoDiv.textContent = '✗ ' + data.message;
+                    resultadoDiv.innerHTML = '<i class="ph-bold ph-warning"></i> ' + data.message;
                 }
+                alert('Error: ' + data.message);
             }
         })
         .catch(err => {
@@ -218,7 +427,7 @@
     function limpiarFormulario() {
         const statusSpan = document.getElementById('dniStatus');
         const resultadoDiv = document.getElementById('resultadoAtencion');
-        if (statusSpan) statusSpan.textContent = '';
-        if (resultadoDiv) resultadoDiv.textContent = '';
+        if (statusSpan) statusSpan.innerHTML = '';
+        if (resultadoDiv) resultadoDiv.innerHTML = '';
     }
 </script>
