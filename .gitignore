@@ -367,3 +367,6 @@ obj/
 *.suo
 .vs/
 app_offline.htm
+
+# VS Code C# Dev Tools - Auto-generated runners
+.vscodecsdt/Runners/
