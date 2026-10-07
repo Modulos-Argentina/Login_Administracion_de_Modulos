@@ -1,32 +1,66 @@
 @{
     Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
-    ViewData["Title"] = "Dashboard de Psicología";
+    ViewData["Title"] = "Servicio de Psicología";
     ViewData["Role"] = "Bienestar Estudiantil";
 }
 
 @section SidebarNav {
     <a href="/Dashboard/Psicologia" class="nav-item active">
         <i class="ph ph-squares-four"></i>
-        Dashboard
+        <span>Dashboard / Bienestar</span>
     </a>
-    <a href="#" class="nav-item">
-        <i class="ph ph-users"></i>
-        Citas Programadas
+    <a href="/Dashboard/Psicologia" class="nav-item">
+        <i class="ph ph-brain"></i>
+        <span>Atención Psicológica</span>
     </a>
-    <a href="#" class="nav-item">
+    <a href="/Dashboard/Psicologia" class="nav-item">
+        <i class="ph ph-calendar-check"></i>
+        <span>Citas Programadas</span>
+    </a>
+    <a href="/Dashboard/Psicologia" class="nav-item">
         <i class="ph ph-file-text"></i>
-        Historial Clínico
+        <span>Historial Clínico</span>
+    </a>
+    <a href="/Dashboard/Psicologia" class="nav-item">
+        <i class="ph ph-users"></i>
+        <span>Directorio de Pacientes</span>
     </a>
 }
 
 <div class="page-header">
-    <h1>Dashboard de Psicología</h1>
-    <p>Resumen del servicio de salud mental y bienestar</p>
+    <h1>Servicio de Psicología y Bienestar Estudiantil</h1>
+    <p>Acompañamiento psicopedagógico y salud mental comunitaria (Módulo 5 - bd.sql)</p>
     <div class="header-accent"></div>
 </div>
 
-<div class="construction-card">
-    <i class="ph ph-brain construction-icon"></i>
-    <h2>Módulo en Construcción</h2>
-    <p>Estamos diseñando este componente para brindarte la mejor experiencia en la Intranet IESTP Argentina.</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+        <div style="width: 48px; height: 48px; border-radius: 10px; background-color: rgba(168, 85, 247, 0.1); color: #a855f7; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i class="ph ph-brain"></i>
+        </div>
+        <div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Atenciones del Mes (atenciones_psicologia)</p>
+            <h3 style="font-size: 1.6rem; font-weight: 700; color: #fff;">38 Sesiones</h3>
+        </div>
+    </div>
+
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+        <div style="width: 48px; height: 48px; border-radius: 10px; background-color: rgba(0, 242, 254, 0.1); color: var(--accent-cyan); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i class="ph ph-calendar-check"></i>
+        </div>
+        <div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Citas Hoy</p>
+            <h3 style="font-size: 1.6rem; font-weight: 700; color: #fff;">6 Programadas</h3>
+        </div>
+    </div>
+
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+        <div style="width: 48px; height: 48px; border-radius: 10px; background-color: rgba(16, 185, 129, 0.1); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i class="ph ph-users"></i>
+        </div>
+        <div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Expedientes Activos</p>
+            <h3 style="font-size: 1.6rem; font-weight: 700; color: #fff;">94 Pacientes</h3>
+        </div>
+    </div>
 </div>

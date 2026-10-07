@@ -160,6 +160,17 @@ body {
 .sidebar-nav {
     padding: 1.5rem 1rem;
     flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
 }
 
 .nav-item {

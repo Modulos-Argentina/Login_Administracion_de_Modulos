@@ -85,25 +85,7 @@ namespace Login_Administracion_de_Modulos.Controlador
                                     HttpContext.Session.SetString("UsuarioRol", rolNombre);
 
                                     // Determinar redirección según el rol de la BD
-                                    string redirectUrl = "/Dashboard/Topico";
-                                    if (rolNombre.Contains("Psicología", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        redirectUrl = "/Dashboard/Psicologia";
-                                    }
-                                    else if (rolNombre.Contains("Docente", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        redirectUrl = "/Dashboard/Docente";
-                                    }
-                                    else if (rolNombre.Contains("Soporte", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        redirectUrl = "/Dashboard/Soporte";
-                                    }
-                                    else
-                                    {
-                                        // Enfermería (Tópico) o por defecto al panel clínico
-                                        redirectUrl = "/Dashboard/Topico";
-                                    }
-
+                                    string redirectUrl = ObtenerRutaDashboardPorRol(rolNombre);
                                     return Redirect(redirectUrl);
                                 }
                                 else
@@ -207,24 +189,7 @@ namespace Login_Administracion_de_Modulos.Controlador
                                 HttpContext.Session.SetString("UsuarioNombre", string.IsNullOrEmpty(nombreCompleto) ? "Lic. Rosa Fernández" : nombreCompleto);
                                 HttpContext.Session.SetString("UsuarioRol", rolNombre);
 
-                                string redirectUrl = "/Dashboard/Topico";
-                                if (rolNombre.Contains("Psicología", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    redirectUrl = "/Dashboard/Psicologia";
-                                }
-                                else if (rolNombre.Contains("Docente", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    redirectUrl = "/Dashboard/Docente";
-                                }
-                                else if (rolNombre.Contains("Soporte", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    redirectUrl = "/Dashboard/Soporte";
-                                }
-                                else
-                                {
-                                    redirectUrl = "/Dashboard/Topico";
-                                }
-
+                                string redirectUrl = ObtenerRutaDashboardPorRol(rolNombre);
                                 return Redirect(redirectUrl);
                             }
                             else
@@ -253,7 +218,42 @@ namespace Login_Administracion_de_Modulos.Controlador
 
         public IActionResult Bienvenido()
         {
-            return RedirectToAction("Topico", "Dashboard");
+            string rol = HttpContext.Session.GetString("UsuarioRol") ?? string.Empty;
+            return Redirect(ObtenerRutaDashboardPorRol(rol));
+        }
+
+        /// <summary>
+        /// Mapea el rol registrado en bd.sql al dashboard correspondiente
+        /// </summary>
+        public static string ObtenerRutaDashboardPorRol(string rolNombre)
+        {
+            if (string.IsNullOrWhiteSpace(rolNombre)) return "/Dashboard/Topico";
+
+            if (rolNombre.Contains("Alumno", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Estudiante", StringComparison.OrdinalIgnoreCase))
+                return "/Dashboard/Alumno";
+
+            if (rolNombre.Contains("Docente", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Profesor", StringComparison.OrdinalIgnoreCase))
+                return "/Dashboard/Docente";
+
+            if (rolNombre.Contains("Psicología", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Psicologo", StringComparison.OrdinalIgnoreCase))
+                return "/Dashboard/Psicologia";
+
+            if (rolNombre.Contains("Jefe de Soporte", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Soporte", StringComparison.OrdinalIgnoreCase))
+                return "/Dashboard/Soporte";
+
+            if (rolNombre.Contains("Practicante", StringComparison.OrdinalIgnoreCase))
+                return "/Dashboard/Practicante";
+
+            if (rolNombre.Contains("Secretar", StringComparison.OrdinalIgnoreCase))
+                return "/Dashboard/Secretaria";
+
+            if (rolNombre.Contains("Admin", StringComparison.OrdinalIgnoreCase))
+                return "/Dashboard/Administrador";
+
+            if (rolNombre.Contains("Tópico", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Enfermer", StringComparison.OrdinalIgnoreCase))
+                return "/Dashboard/Topico";
+
+            return "/Dashboard/Topico";
         }
     }
 }

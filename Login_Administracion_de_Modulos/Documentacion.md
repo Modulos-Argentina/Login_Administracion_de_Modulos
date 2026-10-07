@@ -46,10 +46,14 @@ Login_Administracion_de_Modulos/
 │   │   └── Usuario.cs             # Modelo entidad de datos del usuario
 │   ├── Vista/
 │   │   ├── Dashboard/
-│   │   │   ├── Docente.cshtml     # Panel de gestión académica para docentes
-│   │   │   ├── Psicologia.cshtml  # Panel de bienestar y expedientes psicológicos
-│   │   │   ├── Soporte.cshtml     # Panel de inventario, equipos y laboratorios
-│   │   │   └── Topico.cshtml      # Panel de atenciones de enfermería y salud
+│   │   │   ├── Administrador.cshtml # Panel de auditoría, usuarios y control RBAC
+│   │   │   ├── Alumno.cshtml        # Portal del estudiante: notas, asistencia, tópico y soporte
+│   │   │   ├── Docente.cshtml       # Panel de gestión académica e incidencias de aula
+│   │   │   ├── Practicante.cshtml   # Panel de órdenes técnicas y revisión de laboratorios
+│   │   │   ├── Psicologia.cshtml    # Panel de bienestar y expedientes psicológicos
+│   │   │   ├── Secretaria.cshtml    # Panel de padrón institucional, personas y carreras
+│   │   │   ├── Soporte.cshtml       # Panel de bienes, almacenes, ambientes e incidencias TI
+│   │   │   └── Topico.cshtml        # Panel de atenciones de enfermería, salud y botica
 │   │   ├── Shared/
 │   │   │   ├── _Layout.cshtml     # Plantilla maestra común
 │   │   │   └── _ValidationScriptsPartial.cshtml

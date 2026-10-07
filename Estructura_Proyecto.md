@@ -37,8 +37,12 @@ A continuación se muestra la estructura de directorios y archivos del proyecto 
 |    |    \--- launchSettings.json
 |    +--- Vista
 |    |    +--- Dashboard
+|    |    |    +--- Administrador.cshtml
+|    |    |    +--- Alumno.cshtml
 |    |    |    +--- Docente.cshtml
+|    |    |    +--- Practicante.cshtml
 |    |    |    +--- Psicologia.cshtml
+|    |    |    +--- Secretaria.cshtml
 |    |    |    +--- Soporte.cshtml
 |    |    |    \--- Topico.cshtml
 |    |    +--- images
