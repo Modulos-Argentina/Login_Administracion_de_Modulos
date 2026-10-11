@@ -22,7 +22,6 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
         }
 
         // GET: /Modulo05/Psicologia o /Modulo05/Psicologia/Panel
-        // Redirige al panel centralizado en la raíz (Vista/Dashboard/Psicologia.cshtml)
         [HttpGet("")]
         [HttpGet("Panel")]
         public IActionResult Panel()
@@ -36,7 +35,7 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
         public IActionResult FormSesion(bool partial = false)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            ViewData["Title"] = "Nueva Sesión Psicológica";
+            ViewData["Title"] = "Registro de Sesión Psicológica";
             ViewData["Role"] = "Psicología";
 
             if (partial || isAjax)
@@ -72,20 +71,22 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
         {
             if (string.IsNullOrWhiteSpace(dni))
             {
-                return Json(new { success = false, message = "Ingrese un número de DNI válido." });
+                return Json(new { success = false, message = "Por favor ingrese un número de DNI válido." });
             }
 
             try
             {
-                var alumno = _repo.BuscarEstudiantePorDni(dni);
+                var alumno = _repo.BuscarEstudiantePorDni(dni.Trim());
                 if (alumno != null)
                 {
                     return Json(new
                     {
                         success = true,
                         personaId = alumno.PersonaId,
+                        dni = alumno.NumeroDocumento,
                         nombres = alumno.EstudianteNombres,
                         apellidos = alumno.EstudianteApellidos,
+                        nombreCompleto = alumno.NombreCompleto,
                         carrera = alumno.Carrera,
                         cicloTurno = alumno.CicloTurno
                     });
@@ -99,7 +100,7 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error al consultar paciente: " + ex.Message });
+                return Json(new { success = false, message = "Error al consultar estudiante: " + ex.Message });
             }
         }
 
@@ -118,25 +119,30 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 
                 string? fechaHoraStr = form["fechaHora"].ToString();
                 string? estadoClinico = form["estadoClinico"].ToString();
+                if (string.IsNullOrWhiteSpace(estadoClinico)) estadoClinico = form["estadoAtencion"].ToString();
                 if (string.IsNullOrWhiteSpace(estadoClinico)) estadoClinico = form["estado"].ToString();
 
                 string? diagnosticoNotas = form["diagnosticoNotas"].ToString();
+                if (string.IsNullOrWhiteSpace(diagnosticoNotas)) diagnosticoNotas = form["observacionNotas"].ToString();
                 if (string.IsNullOrWhiteSpace(diagnosticoNotas)) diagnosticoNotas = form["notas"].ToString();
+
+                string? personaIdStr = form["personaId"].ToString();
 
                 if (string.IsNullOrWhiteSpace(dni))
                 {
-                    return Json(new { success = false, message = "Debe buscar y validar un DNI primero." });
+                    return Json(new { success = false, message = "Debe buscar y seleccionar el estudiante mediante su DNI." });
                 }
 
                 if (string.IsNullOrWhiteSpace(motivoConsulta))
                 {
-                    return Json(new { success = false, message = "El motivo de consulta es obligatorio." });
+                    return Json(new { success = false, message = "El motivo de consulta y contexto es obligatorio." });
                 }
 
+                // Obtener o verificar la persona en la base de datos
                 var alumno = _repo.BuscarEstudiantePorDni(dni);
                 if (alumno == null)
                 {
-                    return Json(new { success = false, message = "El DNI no está registrado en el sistema." });
+                    return Json(new { success = false, message = "El DNI ingresado no corresponde a ninguna persona en el sistema." });
                 }
 
                 DateTime fechaHora = DateTime.Now;
@@ -145,14 +151,17 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                     fechaHora = parsedDate;
                 }
 
+                // Identificar psicólogo logueado desde la sesión HTTP
+                int? sesionUsuarioId = HttpContext.Session.GetInt32("UsuarioId");
+
                 var sesion = new SesionPsicologicaItem
                 {
                     PersonaId = alumno.PersonaId,
-                    PsicologoId = 1,
+                    PsicologoId = sesionUsuarioId.HasValue ? sesionUsuarioId.Value : 0,
                     FechaHora = fechaHora,
-                    MotivoConsulta = motivoConsulta,
-                    ObservacionNotas = diagnosticoNotas,
-                    EstadoAtencion = string.IsNullOrWhiteSpace(estadoClinico) ? "En Seguimiento" : estadoClinico
+                    MotivoConsulta = motivoConsulta.Trim(),
+                    ObservacionNotas = string.IsNullOrWhiteSpace(diagnosticoNotas) ? null : diagnosticoNotas.Trim(),
+                    EstadoAtencion = string.IsNullOrWhiteSpace(estadoClinico) ? "Pendiente" : estadoClinico.Trim()
                 };
 
                 bool ok = _repo.RegistrarSesion(sesion);
@@ -161,15 +170,15 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                     return Json(new
                     {
                         success = true,
-                        message = "¡Atención psicológica y notas confidenciales registradas exitosamente!"
+                        message = "¡Sesión psicológica registrada exitosamente en la base de datos!"
                     });
                 }
 
-                return Json(new { success = false, message = "No se pudo registrar la sesión." });
+                return Json(new { success = false, message = "No se pudo registrar la sesión en la base de datos." });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error al procesar registro: " + ex.Message });
+                return Json(new { success = false, message = "Error al procesar el registro: " + ex.Message });
             }
         }
 
@@ -190,9 +199,10 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                 {
                     lista.Add(new
                     {
+                        idAtencion = s.IdAtencionPsico,
                         fechaHora = s.FechaHora.ToString("dd/MM/yyyy HH:mm"),
                         motivo = s.MotivoConsulta,
-                        estado = s.EstadoAtencion ?? "Registrado",
+                        estado = s.EstadoAtencion ?? "Pendiente",
                         notas = s.ObservacionNotas ?? ""
                     });
                 }
