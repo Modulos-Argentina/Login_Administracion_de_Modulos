@@ -204,7 +204,7 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Models
                     FechaHora = reader.GetDateTime(3),
                     MotivoConsulta = reader.IsDBNull(4) ? "" : reader.GetString(4),
                     ObservacionNotas = reader.IsDBNull(5) ? null : reader.GetString(5),
-                    EstadoAtencion = reader.IsDBNull(6) ? null : reader.GetString(6),
+                    EstadoAtencion = reader.IsDBNull(6) ? "Pendiente" : reader.GetString(6),
                     NumeroDocumento = reader.IsDBNull(7) ? "" : reader.GetString(7),
                     EstudianteNombres = reader.IsDBNull(8) ? "" : reader.GetString(8),
                     EstudianteApellidos = reader.IsDBNull(9) ? "" : reader.GetString(9),
