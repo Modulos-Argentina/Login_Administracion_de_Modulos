@@ -25,12 +25,12 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             if (partial || isAjax)
             {
-                return PartialView("~/Areas/Modulo05/Views/AtencionClinica/Create.cshtml");
+                return PartialView("~/Areas/Modulo05/Views/enfermeria/form_atencion.cshtml");
             }
 
             ViewData["Title"] = "Registro de Atención Clínica";
             ViewData["Role"] = "Enfermería (Tópico)";
-            return View("~/Areas/Modulo05/Views/AtencionClinica/Create.cshtml");
+            return View("~/Areas/Modulo05/Views/enfermeria/form_atencion.cshtml");
         }
 
         // GET: /Modulo05/AtencionClinica/BuscarPaciente?dni=...

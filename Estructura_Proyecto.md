@@ -15,18 +15,32 @@ A continuación se muestra la estructura de directorios y archivos del proyecto 
 |    |    |    \--- arias.php
 |    |    \--- Modulo05
 |    |         +--- Controller
-|    |         |    +--- a
 |    |         |    +--- AtencionClinicaController.cs
-|    |         |    \--- PsicologiaController.cs
+|    |         |    +--- AveriaDocenteController.cs
+|    |         |    +--- EnfermeriaController.cs
+|    |         |    +--- PsicologiaController.cs
+|    |         |    \--- SoporteController.cs
 |    |         +--- Models
-|    |         |    \--- a
-|    |         +--- Views
-|    |         |    +--- AtencionClinica
-|    |         |    |    \--- Create.cshtml
-|    |         |    +--- a
-|    |         |    \--- psicologia.cshtml
-|    |         +--- asss
-|    |         \--- psicologia.cshtml
+|    |         |    +--- ActivoHardwareModel.cs
+|    |         |    +--- AtencionMedicaModel.cs
+|    |         |    +--- ExpedientePsicoModel.cs
+|    |         |    \--- TicketAveriaModel.cs
+|    |         \--- Views
+|    |              +--- averias_docente
+|    |              |    +--- form_reporte.cshtml
+|    |              |    \--- mis_reportes.cshtml
+|    |              +--- enfermeria
+|    |              |    +--- form_atencion.cshtml
+|    |              |    +--- historial_paciente.cshtml
+|    |              |    \--- panel_enfermeria.cshtml
+|    |              +--- psicologia
+|    |              |    +--- expediente_alumno.cshtml
+|    |              |    +--- form_sesion.cshtml
+|    |              |    \--- panel_psicologia.cshtml
+|    |              \--- soporte_tecnico
+|    |                   +--- consola_principal.cshtml
+|    |                   +--- form_atender_ticket.cshtml
+|    |                   \--- historial_equipos.cshtml
 |    +--- Controlador
 |    |    +--- DashboardController.cs
 |    |    \--- LoginController.cs

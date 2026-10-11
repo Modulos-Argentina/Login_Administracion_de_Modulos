@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Npgsql;
-using System;
 using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using Login_Administracion_de_Modulos.Areas.Modulo05.Models;
 
 namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 {
@@ -11,10 +12,54 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
     public class PsicologiaController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly ExpedientePsicoRepository _repo;
 
         public PsicologiaController(IConfiguration configuration)
         {
             _configuration = configuration;
+            string conn = _configuration.GetConnectionString("DefaultConnection") ?? "";
+            _repo = new ExpedientePsicoRepository(conn);
+        }
+
+        // GET: /Modulo05/Psicologia o /Modulo05/Psicologia/Panel
+        [HttpGet("")]
+        [HttpGet("Panel")]
+        public IActionResult Panel()
+        {
+            ViewData["Title"] = "Bienestar Psicológico";
+            ViewData["Role"] = "Psicología";
+            return View("~/Areas/Modulo05/Views/psicologia/panel_psicologia.cshtml");
+        }
+
+        // GET: /Modulo05/Psicologia/FormSesion o /Modulo05/Psicologia/Create
+        [HttpGet("Create")]
+        [HttpGet("FormSesion")]
+        public IActionResult FormSesion(bool partial = false)
+        {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            ViewData["Title"] = "Nueva Sesión Psicológica";
+            ViewData["Role"] = "Psicología";
+
+            if (partial || isAjax)
+            {
+                return PartialView("~/Areas/Modulo05/Views/psicologia/form_sesion.cshtml");
+            }
+
+            return View("~/Areas/Modulo05/Views/psicologia/form_sesion.cshtml");
+        }
+
+        // GET: /Modulo05/Psicologia/ExpedienteAlumno
+        [HttpGet("ExpedienteAlumno")]
+        public IActionResult ExpedienteAlumno(string? dni = null)
+        {
+            ViewData["Title"] = "Expediente Confidencial del Alumno";
+            ViewData["Role"] = "Psicología";
+            var historial = !string.IsNullOrWhiteSpace(dni) 
+                ? _repo.ObtenerExpedientePorDni(dni) 
+                : new List<SesionPsicologicaItem>();
+
+            ViewBag.DniBuscado = dni;
+            return View("~/Areas/Modulo05/Views/psicologia/expediente_alumno.cshtml", historial);
         }
 
         // GET: /Modulo05/Psicologia/BuscarPaciente?dni=...
@@ -26,50 +71,27 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                 return Json(new { success = false, message = "Ingrese un número de DNI válido." });
             }
 
-            string? connectionString = _configuration.GetConnectionString("DefaultConnection");
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                return Json(new { success = false, message = "Error de configuración de conexión a base de datos." });
-            }
-
             try
             {
-                using (var connection = new NpgsqlConnection(connectionString))
+                var alumno = _repo.BuscarEstudiantePorDni(dni);
+                if (alumno != null)
                 {
-                    connection.Open();
-                    string query = "SELECT id_persona, nombres, apellidos, numero_documento FROM personas WHERE numero_documento = @dni LIMIT 1";
-
-                    using (var command = new NpgsqlCommand(query, connection))
+                    return Json(new
                     {
-                        command.Parameters.AddWithValue("@dni", dni.Trim());
-
-                        using (var reader = command.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                string nombres = reader.IsDBNull(1) ? "" : reader.GetString(1);
-                                string apellidos = reader.IsDBNull(2) ? "" : reader.GetString(2);
-
-                                return Json(new
-                                {
-                                    success = true,
-                                    nombres = nombres,
-                                    apellidos = apellidos,
-                                    carrera = "Desarrollo de Sistemas de Información",
-                                    cicloTurno = "IV Ciclo / Turno Noche"
-                                });
-                            }
-                            else
-                            {
-                                return Json(new
-                                {
-                                    success = false,
-                                    message = "No se encontró registro para el DNI " + dni + " en la base de datos."
-                                });
-                            }
-                        }
-                    }
+                        success = true,
+                        personaId = alumno.PersonaId,
+                        nombres = alumno.EstudianteNombres,
+                        apellidos = alumno.EstudianteApellidos,
+                        carrera = alumno.Carrera,
+                        cicloTurno = alumno.CicloTurno
+                    });
                 }
+
+                return Json(new
+                {
+                    success = false,
+                    message = $"No se encontró registro para el DNI {dni} en la base de datos."
+                });
             }
             catch (Exception ex)
             {
@@ -77,17 +99,25 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
             }
         }
 
-        // POST: /Modulo05/Psicologia/GuardarAtencion
+        // POST: /Modulo05/Psicologia/GuardarAtencion o /Modulo05/Psicologia/GuardarSesion
         [HttpPost("GuardarAtencion")]
+        [HttpPost("GuardarSesion")]
         public IActionResult GuardarAtencion([FromForm] IFormCollection form)
         {
             try
             {
-                string? dni = form["dniBusqueda"];
-                string? fechaHoraStr = form["fechaHora"];
-                string? estadoClinico = form["estadoClinico"];
-                string? motivoConsulta = form["motivoConsulta"];
-                string? diagnosticoNotas = form["diagnosticoNotas"];
+                string? dni = form["dniBusqueda"].ToString();
+                if (string.IsNullOrWhiteSpace(dni)) dni = form["dni"].ToString();
+
+                string? motivoConsulta = form["motivoConsulta"].ToString();
+                if (string.IsNullOrWhiteSpace(motivoConsulta)) motivoConsulta = form["motivo"].ToString();
+
+                string? fechaHoraStr = form["fechaHora"].ToString();
+                string? estadoClinico = form["estadoClinico"].ToString();
+                if (string.IsNullOrWhiteSpace(estadoClinico)) estadoClinico = form["estado"].ToString();
+
+                string? diagnosticoNotas = form["diagnosticoNotas"].ToString();
+                if (string.IsNullOrWhiteSpace(diagnosticoNotas)) diagnosticoNotas = form["notas"].ToString();
 
                 if (string.IsNullOrWhiteSpace(dni))
                 {
@@ -99,60 +129,46 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                     return Json(new { success = false, message = "El motivo de consulta es obligatorio." });
                 }
 
-                string? connectionString = _configuration.GetConnectionString("DefaultConnection");
-                using (var connection = new NpgsqlConnection(connectionString))
+                var alumno = _repo.BuscarEstudiantePorDni(dni);
+                if (alumno == null)
                 {
-                    connection.Open();
-
-                    // Obtener id_persona
-                    int idPersona = 0;
-                    using (var cmdPersona = new NpgsqlCommand("SELECT id_persona FROM personas WHERE numero_documento = @dni LIMIT 1", connection))
-                    {
-                        cmdPersona.Parameters.AddWithValue("@dni", dni.Trim());
-                        var result = cmdPersona.ExecuteScalar();
-                        if (result == null)
-                        {
-                            return Json(new { success = false, message = "El DNI no está registrado en el sistema." });
-                        }
-                        idPersona = Convert.ToInt32(result);
-                    }
-
-                    // Insertar atención psicológica
-                    string queryInsert = @"
-                        INSERT INTO atenciones_psicologia 
-                        (persona_id, psicologo_id, fecha_hora, motivo_consulta, observacion_notas, estado_atencion)
-                        VALUES (@persona_id, @psicologo_id, @fecha_hora, @motivo, @notas, @estado)";
-
-                    using (var cmdInsert = new NpgsqlCommand(queryInsert, connection))
-                    {
-                        cmdInsert.Parameters.AddWithValue("@persona_id", idPersona);
-                        cmdInsert.Parameters.AddWithValue("@psicologo_id", 1); // Mocked user ID
-                        
-                        DateTime fechaHora = DateTime.Now;
-                        if (!string.IsNullOrEmpty(fechaHoraStr) && DateTime.TryParse(fechaHoraStr, out DateTime parsedDate))
-                        {
-                            fechaHora = parsedDate;
-                        }
-                        cmdInsert.Parameters.AddWithValue("@fecha_hora", fechaHora);
-                        cmdInsert.Parameters.AddWithValue("@motivo", motivoConsulta);
-                        cmdInsert.Parameters.AddWithValue("@notas", string.IsNullOrEmpty(diagnosticoNotas) ? (object)DBNull.Value : diagnosticoNotas);
-                        cmdInsert.Parameters.AddWithValue("@estado", string.IsNullOrEmpty(estadoClinico) ? (object)DBNull.Value : estadoClinico);
-
-                        cmdInsert.ExecuteNonQuery();
-                    }
+                    return Json(new { success = false, message = "El DNI no está registrado en el sistema." });
                 }
 
-                return Json(new
+                DateTime fechaHora = DateTime.Now;
+                if (!string.IsNullOrEmpty(fechaHoraStr) && DateTime.TryParse(fechaHoraStr, out DateTime parsedDate))
                 {
-                    success = true,
-                    message = "¡Atención psicológica registrada exitosamente!"
-                });
+                    fechaHora = parsedDate;
+                }
+
+                var sesion = new SesionPsicologicaItem
+                {
+                    PersonaId = alumno.PersonaId,
+                    PsicologoId = 1,
+                    FechaHora = fechaHora,
+                    MotivoConsulta = motivoConsulta,
+                    ObservacionNotas = diagnosticoNotas,
+                    EstadoAtencion = string.IsNullOrWhiteSpace(estadoClinico) ? "En Seguimiento" : estadoClinico
+                };
+
+                bool ok = _repo.RegistrarSesion(sesion);
+                if (ok)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "¡Atención psicológica y notas confidenciales registradas exitosamente!"
+                    });
+                }
+
+                return Json(new { success = false, message = "No se pudo registrar la sesión." });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Error al procesar registro: " + ex.Message });
             }
         }
+
         // GET: /Modulo05/Psicologia/Historial?dni=...
         [HttpGet("Historial")]
         public IActionResult Historial(string dni)
@@ -162,39 +178,21 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                 return Json(new { success = false, message = "DNI no proporcionado." });
             }
 
-            string? connectionString = _configuration.GetConnectionString("DefaultConnection");
             try
             {
-                using (var connection = new NpgsqlConnection(connectionString))
+                var sesiones = _repo.ObtenerExpedientePorDni(dni);
+                var lista = new List<object>();
+                foreach (var s in sesiones)
                 {
-                    connection.Open();
-                    string query = @"
-                        SELECT a.fecha_hora, a.motivo_consulta, a.estado_atencion, a.observacion_notas
-                        FROM atenciones_psicologia a
-                        INNER JOIN personas p ON a.persona_id = p.id_persona
-                        WHERE p.numero_documento = @dni
-                        ORDER BY a.fecha_hora DESC";
-
-                    using (var command = new NpgsqlCommand(query, connection))
+                    lista.Add(new
                     {
-                        command.Parameters.AddWithValue("@dni", dni.Trim());
-                        using (var reader = command.ExecuteReader())
-                        {
-                            var atenciones = new System.Collections.Generic.List<object>();
-                            while (reader.Read())
-                            {
-                                atenciones.Add(new
-                                {
-                                    fechaHora = reader.IsDBNull(0) ? "" : reader.GetDateTime(0).ToString("dd/MM/yyyy HH:mm"),
-                                    motivo = reader.IsDBNull(1) ? "" : reader.GetString(1),
-                                    estado = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                                    notas = reader.IsDBNull(3) ? "" : reader.GetString(3)
-                                });
-                            }
-                            return Json(new { success = true, data = atenciones });
-                        }
-                    }
+                        fechaHora = s.FechaHora.ToString("dd/MM/yyyy HH:mm"),
+                        motivo = s.MotivoConsulta,
+                        estado = s.EstadoAtencion ?? "Registrado",
+                        notas = s.ObservacionNotas ?? ""
+                    });
                 }
+                return Json(new { success = true, data = lista });
             }
             catch (Exception ex)
             {

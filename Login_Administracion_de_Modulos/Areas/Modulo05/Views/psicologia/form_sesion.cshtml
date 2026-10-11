@@ -1,0 +1,406 @@
+@{
+    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
+    {
+        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
+    }
+    ViewData["Title"] = "Registro de Sesión Psicológica";
+    ViewData["Role"] = "Bienestar Estudiantil";
+}
+
+@section SidebarNav {
+    <a href="/Modulo05/Psicologia/Panel" class="nav-item">
+        <i class="ph ph-brain"></i>
+        <span>Panel Psicología</span>
+    </a>
+    <a href="/Modulo05/Psicologia/FormSesion" class="nav-item active">
+        <i class="ph ph-plus-circle"></i>
+        <span>Nueva Sesión</span>
+    </a>
+    <a href="/Modulo05/Psicologia/ExpedienteAlumno" class="nav-item">
+        <i class="ph ph-folder-user"></i>
+        <span>Expediente Alumno</span>
+    </a>
+    <a href="/Dashboard/Psicologia" class="nav-item">
+        <i class="ph ph-arrow-u-up-left"></i>
+        <span>Volver al Dashboard</span>
+    </a>
+}
+
+<style>
+    :root {
+        --primary-psy: #6366f1;
+        --secondary-psy: #a855f7;
+        --dark-card: #1e1e2d;
+        --dark-bg: #151521;
+        --border-glass: rgba(255, 255, 255, 0.1);
+        --text-muted: #9ca3af;
+        --text-bright: #f3f4f6;
+    }
+
+    .psy-header {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .psy-header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #6366f1, #a855f7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .psy-header p {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    .psy-form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        max-width: 960px;
+        margin: 0 auto;
+    }
+
+    .psy-fieldset {
+        background: rgba(30, 30, 45, 0.65);
+        backdrop-filter: blur(14px);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .psy-fieldset:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+        border-color: rgba(99, 102, 241, 0.35);
+    }
+
+    .psy-legend {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(90deg, #6366f1, #a855f7);
+        padding: 0.4rem 1.2rem;
+        border-radius: 8px;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .psy-form-group {
+        margin-bottom: 1.2rem;
+        position: relative;
+    }
+
+    .psy-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #e5e7eb;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .psy-input, .psy-select, .psy-textarea {
+        width: 100%;
+        background: rgba(15, 15, 20, 0.8);
+        border: 1px solid var(--border-glass);
+        color: #fff;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .psy-input:focus, .psy-select:focus, .psy-textarea:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+
+    .psy-input::placeholder, .psy-textarea::placeholder {
+        color: #6b7280;
+    }
+
+    .psy-input[readonly] {
+        background: rgba(255, 255, 255, 0.03);
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+
+    .psy-btn-search {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .psy-btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
+    }
+
+    .psy-btn-save {
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        color: white;
+        border: none;
+        padding: 0.9rem 2rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .psy-btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    }
+
+    .psy-btn-clear {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-glass);
+        color: #e5e7eb;
+        padding: 0.9rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .psy-btn-clear:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+</style>
+
+<div class="psy-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1>Nueva Sesión de Atención Psicológica</h1>
+            <p>Registro confidencial de consulta, motivo, diagnóstico y notas de evolución clínica</p>
+        </div>
+        <a href="/Modulo05/Psicologia/Panel" class="psy-btn-clear" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="ph ph-arrow-left"></i> Volver al Panel
+        </a>
+    </div>
+</div>
+
+<div class="psy-form-container">
+    <form id="formAtencionPsicologia" onsubmit="event.preventDefault(); guardarSesionPsicologia();">
+
+        <!-- I. IDENTIFICACIÓN DEL ESTUDIANTE -->
+        <fieldset class="psy-fieldset">
+            <legend class="psy-legend"><i class="ph-bold ph-identification-badge"></i> I. Identificación del Estudiante</legend>
+
+            <div class="psy-form-group">
+                <label class="psy-label" for="dniBusqueda">Buscar Alumno (DNI)</label>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <input type="text" id="dniBusqueda" name="dniBusqueda" class="psy-input" placeholder="Ingrese 8 dígitos de DNI..." maxlength="8" style="max-width: 250px;" required />
+                    <button type="button" class="psy-btn-search" onclick="buscarAlumnoDni()">
+                        <i class="ph-bold ph-magnifying-glass"></i> Buscar
+                    </button>
+                    <span id="dniPsyStatus" style="font-size: 0.85rem; font-weight: 600;"></span>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+                <div class="psy-form-group">
+                    <label class="psy-label" for="apellidosNombres">Apellidos y Nombres</label>
+                    <input type="text" id="apellidosNombres" name="apellidosNombres" class="psy-input" placeholder="Se completará automáticamente..." readonly />
+                </div>
+                <div class="psy-form-group">
+                    <label class="psy-label" for="carreraPrograma">Programa de Estudios / Carrera</label>
+                    <input type="text" id="carreraPrograma" name="carreraPrograma" class="psy-input" placeholder="Se completará automáticamente..." readonly />
+                </div>
+            </div>
+
+            <div class="psy-form-group">
+                <label class="psy-label" for="cicloTurno">Ciclo y Turno</label>
+                <input type="text" id="cicloTurno" name="cicloTurno" class="psy-input" placeholder="Se completará automáticamente..." readonly />
+            </div>
+        </fieldset>
+
+        <!-- II. DATOS DE LA SESIÓN -->
+        <fieldset class="psy-fieldset">
+            <legend class="psy-legend"><i class="ph-bold ph-calendar-plus"></i> II. Datos de la Sesión</legend>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+                <div class="psy-form-group">
+                    <label class="psy-label" for="fechaHora">Fecha y Hora de Sesión</label>
+                    <input type="datetime-local" id="fechaHora" name="fechaHora" class="psy-input" required />
+                </div>
+                <div class="psy-form-group">
+                    <label class="psy-label" for="estadoClinico">Estado Anímico / Conductual</label>
+                    <select id="estadoClinico" name="estadoClinico" class="psy-select">
+                        <option value="Estable">Estable / Receptivo</option>
+                        <option value="Ansiedad Moderada">Ansiedad Moderada / Estrés Académico</option>
+                        <option value="Sintomatologia Depresiva">Sintomatología Depresiva</option>
+                        <option value="Crisis Emocional">Crisis Emocional / Atención Prioritaria</option>
+                        <option value="En Seguimiento">En Seguimiento Periódico</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="psy-form-group">
+                <label class="psy-label" for="motivoConsulta">Motivo Principal de Consulta *</label>
+                <textarea id="motivoConsulta" name="motivoConsulta" class="psy-textarea" rows="3" placeholder="Describa el motivo reportado por el estudiante o remitente..." required></textarea>
+            </div>
+        </fieldset>
+
+        <!-- III. NOTAS CONFIDENCIALES Y ACUERDOS -->
+        <fieldset class="psy-fieldset">
+            <legend class="psy-legend"><i class="ph-bold ph-lock-key"></i> III. Notas Confidenciales y Acuerdos</legend>
+
+            <div class="psy-form-group">
+                <label class="psy-label" for="diagnosticoNotas">Notas Clínicas y Compromisos Terapéuticos</label>
+                <textarea id="diagnosticoNotas" name="diagnosticoNotas" class="psy-textarea" rows="4" placeholder="Observaciones reservadas, técnicas de intervención aplicadas y compromisos del alumno..."></textarea>
+            </div>
+        </fieldset>
+
+        <!-- ACCIONES Y MENSAJE DE RESULTADO -->
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; align-items: center; margin-top: 1rem;">
+            <button type="reset" class="psy-btn-clear" onclick="limpiarFormulario()">
+                <i class="ph-bold ph-arrows-counter-clockwise"></i> Limpiar
+            </button>
+            <button type="submit" class="psy-btn-save">
+                <i class="ph-bold ph-floppy-disk"></i> Guardar Sesión
+            </button>
+        </div>
+        <div id="resultadoPsy" style="margin-top: 1rem; font-weight: 700; font-size: 0.95rem; text-align: right;"></div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const now = new Date();
+        const tzOffset = now.getTimezoneOffset() * 60000;
+        const localISOTime = (new Date(now - tzOffset)).toISOString().slice(0, 16);
+        const fechaInput = document.getElementById('fechaHora');
+        if (fechaInput) fechaInput.value = localISOTime;
+    });
+
+    function buscarAlumnoDni() {
+        const dniInput = document.getElementById('dniBusqueda');
+        const dni = dniInput ? dniInput.value.trim() : '';
+        const statusSpan = document.getElementById('dniPsyStatus');
+
+        if (!dni || dni.length < 8) {
+            alert('Por favor ingrese un número de DNI válido de 8 dígitos.');
+            if (dniInput) dniInput.focus();
+            return;
+        }
+
+        if (statusSpan) {
+            statusSpan.style.color = 'var(--text-muted)';
+            statusSpan.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Consultando en PostgreSQL...';
+        }
+
+        fetch('/Modulo05/Psicologia/BuscarPaciente?dni=' + encodeURIComponent(dni))
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (statusSpan) {
+                        statusSpan.style.color = '#10b981';
+                        statusSpan.innerHTML = '<i class="ph-bold ph-check-circle"></i> Alumno encontrado';
+                    }
+                    const nomInput = document.getElementById('apellidosNombres');
+                    const carInput = document.getElementById('carreraPrograma');
+                    const cicInput = document.getElementById('cicloTurno');
+
+                    if (nomInput) nomInput.value = (data.apellidos + ' ' + data.nombres).trim();
+                    if (carInput) carInput.value = data.carrera || 'Desarrollo de Sistemas de Información';
+                    if (cicInput) cicInput.value = data.cicloTurno || 'IV Ciclo / Turno Noche';
+                } else {
+                    if (statusSpan) {
+                        statusSpan.style.color = '#f87171';
+                        statusSpan.innerHTML = '<i class="ph-bold ph-x-circle"></i> ' + (data.message || 'No encontrado');
+                    }
+                }
+            })
+            .catch(err => {
+                if (statusSpan) {
+                    statusSpan.style.color = '#f87171';
+                    statusSpan.textContent = 'Error al consultar DNI';
+                }
+            });
+    }
+
+    function guardarSesionPsicologia() {
+        const form = document.getElementById('formAtencionPsicologia');
+        const motivo = document.getElementById('motivoConsulta');
+        const dni = document.getElementById('dniBusqueda');
+        const resultadoDiv = document.getElementById('resultadoPsy');
+
+        if (!dni || !dni.value.trim()) {
+            alert('Debe buscar e ingresar el DNI del alumno.');
+            if (dni) dni.focus();
+            return;
+        }
+
+        if (!motivo || !motivo.value.trim()) {
+            alert('El campo "MOTIVO PRINCIPAL DE CONSULTA" es obligatorio.');
+            if (motivo) motivo.focus();
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        fetch('/Modulo05/Psicologia/GuardarAtencion', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (resultadoDiv) {
+                    resultadoDiv.style.color = '#10b981';
+                    resultadoDiv.innerHTML = '<i class="ph-bold ph-check-circle"></i> ' + data.message;
+                }
+                alert(data.message || 'Sesión guardada con éxito');
+                form.reset();
+                const now = new Date();
+                const tzOffset = now.getTimezoneOffset() * 60000;
+                document.getElementById('fechaHora').value = (new Date(now - tzOffset)).toISOString().slice(0, 16);
+                limpiarFormulario();
+            } else {
+                if (resultadoDiv) {
+                    resultadoDiv.style.color = '#f87171';
+                    resultadoDiv.innerHTML = '<i class="ph-bold ph-warning"></i> ' + data.message;
+                }
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(err => {
+            if (resultadoDiv) {
+                resultadoDiv.style.color = '#f87171';
+                resultadoDiv.textContent = 'Error de conexión: ' + err.message;
+            }
+        });
+    }
+
+    function limpiarFormulario() {
+        const statusSpan = document.getElementById('dniPsyStatus');
+        const resultadoDiv = document.getElementById('resultadoPsy');
+        if (statusSpan) statusSpan.innerHTML = '';
+        if (resultadoDiv) resultadoDiv.innerHTML = '';
+    }
+</script>

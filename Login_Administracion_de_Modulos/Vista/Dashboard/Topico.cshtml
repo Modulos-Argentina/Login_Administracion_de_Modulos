@@ -11,15 +11,15 @@
     </a>
     <a href="javascript:void(0)" class="nav-item" id="nav-atencion" onclick="cargarAtencionClinica()">
         <i class="ph ph-first-aid"></i>
-        <span>Atención Clínica</span>
-    </a>
-    <a href="javascript:void(0)" class="nav-item" id="nav-botica" onclick="mostrarDashboard()">
-        <i class="ph ph-pill"></i>
-        <span>Botica y Medicamentos</span>
+        <span>Registrar Atención</span>
     </a>
     <a href="javascript:void(0)" class="nav-item" id="nav-historial" onclick="mostrarHistorial()">
         <i class="ph ph-clipboard-text"></i>
         <span>Historial de Pacientes</span>
+    </a>
+    <a href="/Modulo05/Enfermeria/Panel" class="nav-item" id="nav-botica">
+        <i class="ph ph-pill"></i>
+        <span>Control de Botica (M05)</span>
     </a>
 }
 
@@ -199,7 +199,7 @@
                     </div>
                 `;
 
-                fetch('/Modulo05/AtencionClinica/Create?partial=true', {
+                fetch('/Modulo05/Enfermeria/FormAtencion?partial=true', {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
@@ -267,7 +267,7 @@
             }
             resultDiv.style.display = 'none';
 
-            fetch('/Modulo05/AtencionClinica/Historial?dni=' + encodeURIComponent(dni))
+            fetch('/Modulo05/Enfermeria/Historial?dni=' + encodeURIComponent(dni))
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {

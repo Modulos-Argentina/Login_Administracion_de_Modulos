@@ -1,0 +1,144 @@
+@model List<Login_Administracion_de_Modulos.Areas.Modulo05.Models.AtencionMedicaItem>
+@{
+    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
+    {
+        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
+    }
+    ViewData["Title"] = "Historial Clínico del Paciente";
+    ViewData["Role"] = "Enfermería (Tópico)";
+}
+
+@section SidebarNav {
+    <a href="/Modulo05/Enfermeria/Panel" class="nav-item">
+        <i class="ph ph-heartbeat"></i>
+        <span>Panel Tópico</span>
+    </a>
+    <a href="/Modulo05/Enfermeria/FormAtencion" class="nav-item">
+        <i class="ph ph-plus-circle"></i>
+        <span>Nueva Atención</span>
+    </a>
+    <a href="/Modulo05/Enfermeria/HistorialPaciente" class="nav-item active">
+        <i class="ph ph-clipboard-text"></i>
+        <span>Historial Paciente</span>
+    </a>
+    <a href="/Dashboard/Topico" class="nav-item">
+        <i class="ph ph-arrow-u-up-left"></i>
+        <span>Volver al Dashboard</span>
+    </a>
+}
+
+<div class="page-header" style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 2rem; font-weight: 800; background: linear-gradient(90deg, #10b981, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0 0 0.5rem 0;">
+                Historial Clínico de Atenciones
+            </h1>
+            <p style="color: var(--text-secondary); margin: 0;">Consulta cronológica de consultas médicas, tratamientos y prescripciones en Tópico</p>
+        </div>
+        <a href="/Modulo05/Enfermeria/FormAtencion" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: white; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="ph-bold ph-plus"></i> Nueva Atención
+        </a>
+    </div>
+</div>
+
+<!-- Buscador de Paciente -->
+<div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+    <form method="get" action="/Modulo05/Enfermeria/HistorialPaciente" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <label for="dni" style="color: #fff; font-weight: 600; font-size: 0.95rem;">Buscar por DNI de Paciente:</label>
+        <input type="text" id="dni" name="dni" value="@(ViewBag.DniBuscado ?? "")" placeholder="Ingrese 8 dígitos de DNI..." maxlength="8" style="background: rgba(15,15,20,0.8); border: 1px solid var(--border-glass); color: #fff; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; width: 260px;" required />
+        <button type="submit" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="ph-bold ph-magnifying-glass"></i> Consultar
+        </button>
+        @if (!string.IsNullOrEmpty(ViewBag.DniBuscado as string))
+        {
+            <a href="/Modulo05/Enfermeria/HistorialPaciente" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; margin-left: 0.5rem;">Limpiar filtro</a>
+        }
+    </form>
+</div>
+
+<!-- Resultados del Historial -->
+<div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.75rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.6rem;">
+            <i class="ph ph-file-text" style="color: #10b981;"></i> Registro Histórico
+            @if (!string.IsNullOrEmpty(ViewBag.DniBuscado as string))
+            {
+                <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">(DNI: @ViewBag.DniBuscado)</span>
+            }
+        </h3>
+        <button type="button" onclick="window.print()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+            <i class="ph ph-printer"></i> Imprimir Reporte
+        </button>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;">
+                        <th style="padding: 0.75rem;">Fecha y Hora</th>
+                        <th style="padding: 0.75rem;">Paciente</th>
+                        <th style="padding: 0.75rem;">Motivo Consulta</th>
+                        <th style="padding: 0.75rem;">Alergias</th>
+                        <th style="padding: 0.75rem;">Medicamento / Tratamiento</th>
+                        <th style="padding: 0.75rem;">Seguro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var atencion in Model)
+                    {
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0;">
+                            <td style="padding: 0.75rem; font-weight: 600; color: #fff;">
+                                @atencion.FechaHora.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td style="padding: 0.75rem;">
+                                <div style="font-weight: 700; color: #fff;">@atencion.PacienteNombres @atencion.PacienteApellidos</div>
+                                <small style="color: var(--text-secondary);">DNI: @atencion.NumeroDocumento</small>
+                            </td>
+                            <td style="padding: 0.75rem; max-width: 260px;">
+                                <div style="font-weight: 600; color: #e2e8f0;">@atencion.Motivo</div>
+                                @if (!string.IsNullOrWhiteSpace(atencion.Observacion))
+                                {
+                                    <small style="color: var(--text-secondary); display: block; margin-top: 0.2rem;">@atencion.Observacion</small>
+                                }
+                            </td>
+                            <td style="padding: 0.75rem;">
+                                @if (atencion.EsAlergico)
+                                {
+                                    <span style="background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 700;">
+                                        @(atencion.DetalleAlergia ?? "Alérgico Reportado")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+                                        Sin Alergias
+                                    </span>
+                                }
+                            </td>
+                            <td style="padding: 0.75rem; color: #38bdf8; font-weight: 600;">
+                                @(atencion.MedicamentoNombre ?? "Atención ambulatoria / Reposo")
+                            </td>
+                            <td style="padding: 0.75rem;">
+                                <span style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+                                    @(atencion.SeguroSalud ?? "SIS")
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; font-size: 2rem; color: var(--text-muted);">
+                <i class="ph ph-folder-open"></i>
+            </div>
+            <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem;">No se encontraron registros de atención</h4>
+            <p style="font-size: 0.95rem; margin: 0;">Ingrese un número de DNI arriba para consultar el historial médico del estudiante o docente.</p>
+        </div>
+    }
+</div>

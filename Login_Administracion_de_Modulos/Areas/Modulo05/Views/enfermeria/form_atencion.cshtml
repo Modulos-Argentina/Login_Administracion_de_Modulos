@@ -1,0 +1,460 @@
+@{
+    // Si la petición NO es parcial (ingreso directo por URL), usar el layout del dashboard
+    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
+    {
+        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
+    }
+    ViewData["Title"] = "Registro de Atención Médica";
+    ViewData["Role"] = "Enfermería (Tópico)";
+}
+
+@section SidebarNav {
+    <a href="/Modulo05/Enfermeria/Panel" class="nav-item">
+        <i class="ph ph-heartbeat"></i>
+        <span>Panel Tópico</span>
+    </a>
+    <a href="/Modulo05/Enfermeria/FormAtencion" class="nav-item active">
+        <i class="ph ph-plus-circle"></i>
+        <span>Nueva Atención</span>
+    </a>
+    <a href="/Modulo05/Enfermeria/HistorialPaciente" class="nav-item">
+        <i class="ph ph-clipboard-text"></i>
+        <span>Historial Paciente</span>
+    </a>
+    <a href="/Dashboard/Topico" class="nav-item">
+        <i class="ph ph-arrow-u-up-left"></i>
+        <span>Volver al Dashboard</span>
+    </a>
+}
+
+<style>
+    /* Estilos Premium para Formulario de Atención de Enfermería */
+    :root {
+        --primary-clinic: #10b981;
+        --secondary-clinic: #06b6d4;
+        --dark-card: #1e1e2d;
+        --dark-bg: #151521;
+        --border-glass: rgba(255, 255, 255, 0.1);
+        --text-muted: #9ca3af;
+        --text-bright: #f3f4f6;
+    }
+
+    .clinic-header {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .clinic-header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #10b981, #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .clinic-header p {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    .clinic-form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        max-width: 960px;
+        margin: 0 auto;
+    }
+
+    .clinic-fieldset {
+        background: rgba(30, 30, 45, 0.65);
+        backdrop-filter: blur(14px);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .clinic-fieldset:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+        border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .clinic-legend {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(90deg, #10b981, #059669);
+        padding: 0.4rem 1.2rem;
+        border-radius: 8px;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+
+    .clinic-form-group {
+        margin-bottom: 1.2rem;
+        position: relative;
+    }
+
+    .clinic-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #e5e7eb;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .clinic-input, .clinic-select, .clinic-textarea {
+        width: 100%;
+        background: rgba(15, 15, 20, 0.8);
+        border: 1px solid var(--border-glass);
+        color: #fff;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .clinic-input:focus, .clinic-select:focus, .clinic-textarea:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    }
+
+    .clinic-input::placeholder, .clinic-textarea::placeholder {
+        color: #6b7280;
+    }
+
+    .clinic-input[readonly] {
+        background: rgba(255, 255, 255, 0.03);
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+
+    .clinic-btn-search {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .clinic-btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+    }
+
+    .clinic-btn-save {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 0.9rem 2rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .clinic-btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .clinic-btn-clear {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-glass);
+        color: #e5e7eb;
+        padding: 0.9rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .clinic-btn-clear:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+
+    .clinic-checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-glass);
+    }
+
+    .clinic-checkbox-container input[type="checkbox"] {
+        width: 1.2rem;
+        height: 1.2rem;
+        accent-color: #10b981;
+        cursor: pointer;
+    }
+</style>
+
+<div class="clinic-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1>Registro de Atención Médica (Tópico)</h1>
+            <p>Formulario de atención de salud ambulatoria, signos vitales, alergias y botica estudiantil</p>
+        </div>
+        <a href="/Modulo05/Enfermeria/Panel" class="clinic-btn-clear" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="ph ph-arrow-left"></i> Volver al Panel
+        </a>
+    </div>
+</div>
+
+<div class="clinic-form-container">
+    <form id="formAtencionClinica" onsubmit="event.preventDefault(); guardarAtencionClinica();">
+
+        <!-- I. IDENTIFICACIÓN DEL PACIENTE -->
+        <fieldset class="clinic-fieldset">
+            <legend class="clinic-legend"><i class="ph-bold ph-identification-badge"></i> I. Identificación del Paciente</legend>
+
+            <div class="clinic-form-group">
+                <label class="clinic-label" for="buscarDni">Buscar Paciente (DNI)</label>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <input type="text" id="buscarDni" name="buscarDni" class="clinic-input" placeholder="Ingrese 8 dígitos de DNI..." maxlength="8" style="max-width: 250px;" required />
+                    <button type="button" class="clinic-btn-search" onclick="buscarPacienteDni()">
+                        <i class="ph-bold ph-magnifying-glass"></i> Buscar
+                    </button>
+                    <span id="dniStatus" style="font-size: 0.85rem; font-weight: 600;"></span>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+                <div class="clinic-form-group">
+                    <label class="clinic-label" for="apellidosNombres">Apellidos y Nombres</label>
+                    <input type="text" id="apellidosNombres" name="apellidosNombres" class="clinic-input" placeholder="Se completará automáticamente..." readonly />
+                </div>
+                <div class="clinic-form-group">
+                    <label class="clinic-label" for="tipoSeguroSalud">Seguro de Salud</label>
+                    <select id="tipoSeguroSalud" name="tipoSeguroSalud" class="clinic-select">
+                        <option value="SIS">SIS (Seguro Integral de Salud)</option>
+                        <option value="EsSalud">EsSalud</option>
+                        <option value="Privado">Seguro Privado / EPS</option>
+                        <option value="Ninguno">Sin Seguro Reportado</option>
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- II. DATOS DE LA ATENCIÓN -->
+        <fieldset class="clinic-fieldset">
+            <legend class="clinic-legend"><i class="ph-bold ph-activity"></i> II. Datos de la Atención y Diagnóstico</legend>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+                <div class="clinic-form-group">
+                    <label class="clinic-label" for="fechaHora">Fecha y Hora de Atención</label>
+                    <input type="datetime-local" id="fechaHora" name="fechaHora" class="clinic-input" required />
+                </div>
+                <div class="clinic-form-group">
+                    <label class="clinic-label" for="tipoAtencion">Tipo de Consulta / Emergencia</label>
+                    <select id="tipoAtencion" name="tipoAtencion" class="clinic-select">
+                        <option value="Ambulatoria">Atención Ambulatoria Regular</option>
+                        <option value="Urgencia">Urgencia / Malestar Agudo</option>
+                        <option value="Curacion">Curación / Primeros Auxilios</option>
+                        <option value="Control">Control de Signos Vitales</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="clinic-form-group">
+                <label class="clinic-label" for="motivoAtencion">Motivo de Consulta y Síntomas *</label>
+                <textarea id="motivoAtencion" name="motivoAtencion" class="clinic-textarea" rows="3" placeholder="Ej: Cefalea intensa, fiebre de 38.5°C, náuseas..." required></textarea>
+            </div>
+        </fieldset>
+
+        <!-- III. ALERGIAS Y MEDICACIÓN -->
+        <fieldset class="clinic-fieldset">
+            <legend class="clinic-legend"><i class="ph-bold ph-pill"></i> III. Alergias y Medicación de Botica</legend>
+
+            <div class="clinic-form-group">
+                <div class="clinic-checkbox-container">
+                    <input type="checkbox" id="reportaAlergias" name="reportaAlergias" onchange="toggleAlergiasInput()" />
+                    <label for="reportaAlergias" style="color: #fff; font-weight: 600; cursor: pointer;">¿El paciente reporta alguna alergia medicamentosa o alimentaria?</label>
+                </div>
+            </div>
+
+            <div class="clinic-form-group" id="grupoAlergias" style="display: none;">
+                <label class="clinic-label" for="especificarAlergias">Especificar Alergias</label>
+                <input type="text" id="especificarAlergias" name="especificarAlergias" class="clinic-input" placeholder="Ej: Penicilina, Sulfas, AINES..." />
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+                <div class="clinic-form-group">
+                    <label class="clinic-label" for="medicamentoId">Seleccionar Medicamento de Botica</label>
+                    <select id="medicamentoId" name="medicamentoId" class="clinic-select">
+                        <option value="0">-- Ninguno / Solo reposo --</option>
+                        <option value="1">Paracetamol 500mg (Tabletas)</option>
+                        <option value="2">Ibuprofeno 400mg (Tabletas)</option>
+                        <option value="3">Amoxicilina 500mg (Cápsulas)</option>
+                        <option value="4">Alcohol Medicinal 70° (Frasco)</option>
+                        <option value="5">Gasa Estéril y Esparadrapo</option>
+                    </select>
+                </div>
+                <div class="clinic-form-group">
+                    <label class="clinic-label" for="medicamentosAdministrados">Dosis / Indicaciones</label>
+                    <input type="text" id="medicamentosAdministrados" name="medicamentosAdministrados" class="clinic-input" placeholder="Ej: 1 tableta cada 8 horas después de alimentos" />
+                </div>
+            </div>
+
+            <div class="clinic-form-group">
+                <label class="clinic-label" for="observacionesTratamiento">Observaciones y Recomendaciones Clínicas</label>
+                <textarea id="observacionesTratamiento" name="observacionesTratamiento" class="clinic-textarea" rows="2" placeholder="Recomendaciones de reposo o derivación al centro de salud..."></textarea>
+            </div>
+        </fieldset>
+
+        <!-- ACCIONES Y MENSAJE DE RESULTADO -->
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; align-items: center; margin-top: 1rem;">
+            <button type="reset" class="clinic-btn-clear" onclick="limpiarFormulario()">
+                <i class="ph-bold ph-arrows-counter-clockwise"></i> Limpiar
+            </button>
+            <button type="submit" class="clinic-btn-save">
+                <i class="ph-bold ph-floppy-disk"></i> Guardar Atención
+            </button>
+        </div>
+        <div id="resultadoAtencion" style="margin-top: 1rem; font-weight: 700; font-size: 0.95rem; text-align: right;"></div>
+    </form>
+</div>
+
+<script>
+    // Inicializar fecha y hora actual
+    document.addEventListener('DOMContentLoaded', function () {
+        const now = new Date();
+        const tzOffset = now.getTimezoneOffset() * 60000;
+        const localISOTime = (new Date(now - tzOffset)).toISOString().slice(0, 16);
+        const fechaInput = document.getElementById('fechaHora');
+        if (fechaInput) fechaInput.value = localISOTime;
+    });
+
+    function toggleAlergiasInput() {
+        const checkbox = document.getElementById('reportaAlergias');
+        const grupo = document.getElementById('grupoAlergias');
+        if (grupo) {
+            grupo.style.display = checkbox && checkbox.checked ? 'block' : 'none';
+        }
+    }
+
+    // Búsqueda AJAX de paciente por DNI en PostgreSQL
+    function buscarPacienteDni() {
+        const dniInput = document.getElementById('buscarDni');
+        const dni = dniInput ? dniInput.value.trim() : '';
+        const statusSpan = document.getElementById('dniStatus');
+
+        if (!dni || dni.length < 8) {
+            alert('Por favor ingrese un número de DNI válido de 8 dígitos.');
+            if (dniInput) dniInput.focus();
+            return;
+        }
+
+        if (statusSpan) {
+            statusSpan.style.color = 'var(--text-muted)';
+            statusSpan.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Consultando en PostgreSQL...';
+        }
+
+        fetch('/Modulo05/Enfermeria/BuscarPaciente?dni=' + encodeURIComponent(dni))
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (statusSpan) {
+                        statusSpan.style.color = '#10b981';
+                        statusSpan.innerHTML = '<i class="ph-bold ph-check-circle"></i> Paciente encontrado';
+                    }
+                    const nomInput = document.getElementById('apellidosNombres');
+                    if (nomInput) nomInput.value = (data.apellidos + ' ' + data.nombres).trim();
+                } else {
+                    if (statusSpan) {
+                        statusSpan.style.color = '#f87171';
+                        statusSpan.innerHTML = '<i class="ph-bold ph-x-circle"></i> ' + (data.message || 'No encontrado');
+                    }
+                }
+            })
+            .catch(err => {
+                if (statusSpan) {
+                    statusSpan.style.color = '#f87171';
+                    statusSpan.textContent = 'Error al consultar DNI';
+                }
+            });
+    }
+
+    // Guardado de atención clínica vía AJAX
+    function guardarAtencionClinica() {
+        const form = document.getElementById('formAtencionClinica');
+        const motivo = document.getElementById('motivoAtencion');
+        const dni = document.getElementById('buscarDni');
+        const resultadoDiv = document.getElementById('resultadoAtencion');
+
+        if (!dni || !dni.value.trim()) {
+            alert('Debe buscar e ingresar el DNI del paciente.');
+            if (dni) dni.focus();
+            return;
+        }
+
+        if (!motivo || !motivo.value.trim()) {
+            alert('El campo "MOTIVO DE ATENCIÓN" es obligatorio.');
+            if (motivo) motivo.focus();
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        fetch('/Modulo05/Enfermeria/GuardarAtencion', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (resultadoDiv) {
+                    resultadoDiv.style.color = '#10b981';
+                    resultadoDiv.innerHTML = '<i class="ph-bold ph-check-circle"></i> ' + data.message;
+                }
+                alert(data.message || 'Atención registrada con éxito');
+                form.reset();
+                const now = new Date();
+                const tzOffset = now.getTimezoneOffset() * 60000;
+                document.getElementById('fechaHora').value = (new Date(now - tzOffset)).toISOString().slice(0, 16);
+                limpiarFormulario();
+            } else {
+                if (resultadoDiv) {
+                    resultadoDiv.style.color = '#f87171';
+                    resultadoDiv.innerHTML = '<i class="ph-bold ph-warning"></i> ' + data.message;
+                }
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(err => {
+            if (resultadoDiv) {
+                resultadoDiv.style.color = '#f87171';
+                resultadoDiv.textContent = 'Error de conexión: ' + err.message;
+            }
+        });
+    }
+
+    function limpiarFormulario() {
+        const statusSpan = document.getElementById('dniStatus');
+        const resultadoDiv = document.getElementById('resultadoAtencion');
+        if (statusSpan) statusSpan.innerHTML = '';
+        if (resultadoDiv) resultadoDiv.innerHTML = '';
+    }
+</script>

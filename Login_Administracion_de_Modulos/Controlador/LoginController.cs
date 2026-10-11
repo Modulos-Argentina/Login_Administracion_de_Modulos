@@ -208,6 +208,79 @@ namespace Login_Administracion_de_Modulos.Controlador
             }
         }
 
+        // ==========================================
+        // RUTA 3: Sesión Local de Prueba (Demo sin BD)
+        // ==========================================
+        [HttpGet("login-demo/{rol}")]
+        public IActionResult LoginDemo(string rol)
+        {
+            HttpContext.Session.Clear();
+
+            string nombreDemo;
+            string rolDemo;
+            int idDemo;
+
+            switch (rol?.Trim().ToLowerInvariant())
+            {
+                case "topico":
+                case "enfermeria":
+                    nombreDemo = "Lic. Rosa Fernández (Demo)";
+                    rolDemo = "Enfermería (Tópico)";
+                    idDemo = 101;
+                    break;
+                case "psicologia":
+                    nombreDemo = "Lic. Juan Psicólogo (Demo)";
+                    rolDemo = "Psicología";
+                    idDemo = 102;
+                    break;
+                case "docente":
+                    nombreDemo = "Prof. Carlos Docente (Demo)";
+                    rolDemo = "Docente";
+                    idDemo = 103;
+                    break;
+                case "soporte":
+                    nombreDemo = "Ing. Mario Soporte (Demo)";
+                    rolDemo = "Jefe de Soporte";
+                    idDemo = 104;
+                    break;
+                case "alumno":
+                case "estudiante":
+                    nombreDemo = "Estudiante Ana Torres (Demo)";
+                    rolDemo = "Alumno";
+                    idDemo = 105;
+                    break;
+                case "practicante":
+                    nombreDemo = "Téc. Luis Practicante (Demo)";
+                    rolDemo = "Practicante";
+                    idDemo = 106;
+                    break;
+                case "secretaria":
+                    nombreDemo = "Lic. Carmen Secretaría (Demo)";
+                    rolDemo = "Secretaría Académica";
+                    idDemo = 107;
+                    break;
+                case "admin":
+                case "administrador":
+                    nombreDemo = "Administrador del Sistema (Demo)";
+                    rolDemo = "Administrador";
+                    idDemo = 108;
+                    break;
+                default:
+                    nombreDemo = "Personal Demo";
+                    rolDemo = "Enfermería (Tópico)";
+                    idDemo = 100;
+                    break;
+            }
+
+            // Iniciar sesión local en memoria sin consultar PostgreSQL
+            HttpContext.Session.SetInt32("UsuarioId", idDemo);
+            HttpContext.Session.SetString("UsuarioNombre", nombreDemo);
+            HttpContext.Session.SetString("UsuarioRol", rolDemo);
+            HttpContext.Session.SetString("EsDemo", "true");
+
+            return Redirect(ObtenerRutaDashboardPorRol(rolDemo));
+        }
+
         [HttpGet("logout")]
         [HttpGet("Login/Logout")]
         public IActionResult Logout()

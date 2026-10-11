@@ -400,6 +400,23 @@ body {
 .icon-psicologia { background-color: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
 .icon-docente { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
 .icon-soporte { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.icon-alumno { background-color: rgba(99, 102, 241, 0.1); color: #818cf8; }
+.icon-secretaria { background-color: rgba(236, 72, 153, 0.1); color: #f472b6; }
+.icon-practicante { background-color: rgba(14, 165, 233, 0.1); color: #38bdf8; }
+.icon-admin { background-color: rgba(239, 68, 68, 0.1); color: #f87171; }
+
+.demo-tag {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    margin-right: 0.5rem;
+    letter-spacing: 0.5px;
+}
 
 .module-info {
     flex: 1;

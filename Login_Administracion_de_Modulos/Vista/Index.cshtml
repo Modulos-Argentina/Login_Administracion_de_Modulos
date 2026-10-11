@@ -100,51 +100,102 @@
             </form>
 
             <div class="modules-section">
-                <h3>Acceso Rápido - Demo</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                    <h3>Acceso Rápido - Modo Demo Local</h3>
+                    <span class="demo-tag" style="margin: 0;">Sin BD</span>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.85rem;">Ingresa a los paneles con una sesión local de prueba sin necesidad de usuario ni contraseña:</p>
                 <div class="module-list">
-                    <a href="/Dashboard/Topico" class="module-card">
+                    <a href="/login-demo/topico" class="module-card">
                         <div class="module-icon icon-enfermeria">
                             <i class="ph ph-first-aid"></i>
                         </div>
                         <div class="module-info">
-                            <h4>Enfermería</h4>
-                            <p>Módulo de Tópico</p>
+                            <h4>Enfermería (Tópico)</h4>
+                            <p>Módulo de Salud y Triaje</p>
                         </div>
+                        <span class="demo-tag">Probar</span>
                         <i class="ph ph-caret-right module-arrow"></i>
                     </a>
                     
-                    <a href="/Dashboard/Psicologia" class="module-card">
+                    <a href="/login-demo/psicologia" class="module-card">
                         <div class="module-icon icon-psicologia">
                             <i class="ph ph-brain"></i>
                         </div>
                         <div class="module-info">
                             <h4>Psicología</h4>
-                            <p>Bienestar Estudiantil</p>
+                            <p>Bienestar Estudiantil y Casos</p>
                         </div>
+                        <span class="demo-tag">Probar</span>
                         <i class="ph ph-caret-right module-arrow"></i>
                     </a>
 
-                    <a href="/Dashboard/Docente" class="module-card">
+                    <a href="/login-demo/docente" class="module-card">
                         <div class="module-icon icon-docente">
                             <i class="ph ph-chalkboard-teacher"></i>
                         </div>
                         <div class="module-info">
                             <h4>Docente</h4>
-                            <p>Portal Docente</p>
+                            <p>Portal Docente y Reporte de Averías</p>
                         </div>
+                        <span class="demo-tag">Probar</span>
                         <i class="ph ph-caret-right module-arrow"></i>
                     </a>
 
-                    <a href="/Dashboard/Soporte" class="module-card">
+                    <a href="/login-demo/soporte" class="module-card">
                         <div class="module-icon icon-soporte">
                             <i class="ph ph-wrench"></i>
                         </div>
                         <div class="module-info">
                             <h4>Admin. Soporte</h4>
-                            <p>Gestión de Incidencias</p>
+                            <p>Consola Técnica e Incidencias</p>
                         </div>
+                        <span class="demo-tag">Probar</span>
                         <i class="ph ph-caret-right module-arrow"></i>
                     </a>
+                </div>
+
+                <!-- Paneles adicionales de prueba -->
+                <div style="margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px dashed var(--border-color);">
+                    <p style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Otros Paneles (Demo):</p>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                        <a href="/login-demo/alumno" class="module-card" style="padding: 0.6rem 0.75rem;">
+                            <div class="module-icon icon-alumno" style="width: 2rem; height: 2rem; margin-right: 0.6rem; font-size: 1.1rem;">
+                                <i class="ph ph-student"></i>
+                            </div>
+                            <div class="module-info">
+                                <h4 style="font-size: 0.8rem; margin: 0;">Alumno</h4>
+                            </div>
+                            <i class="ph ph-caret-right module-arrow" style="font-size: 0.8rem;"></i>
+                        </a>
+                        <a href="/login-demo/secretaria" class="module-card" style="padding: 0.6rem 0.75rem;">
+                            <div class="module-icon icon-secretaria" style="width: 2rem; height: 2rem; margin-right: 0.6rem; font-size: 1.1rem;">
+                                <i class="ph ph-files"></i>
+                            </div>
+                            <div class="module-info">
+                                <h4 style="font-size: 0.8rem; margin: 0;">Secretaría</h4>
+                            </div>
+                            <i class="ph ph-caret-right module-arrow" style="font-size: 0.8rem;"></i>
+                        </a>
+                        <a href="/login-demo/practicante" class="module-card" style="padding: 0.6rem 0.75rem;">
+                            <div class="module-icon icon-practicante" style="width: 2rem; height: 2rem; margin-right: 0.6rem; font-size: 1.1rem;">
+                                <i class="ph ph-briefcase"></i>
+                            </div>
+                            <div class="module-info">
+                                <h4 style="font-size: 0.8rem; margin: 0;">Practicante</h4>
+                            </div>
+                            <i class="ph ph-caret-right module-arrow" style="font-size: 0.8rem;"></i>
+                        </a>
+                        <a href="/login-demo/admin" class="module-card" style="padding: 0.6rem 0.75rem;">
+                            <div class="module-icon icon-admin" style="width: 2rem; height: 2rem; margin-right: 0.6rem; font-size: 1.1rem;">
+                                <i class="ph ph-shield-star"></i>
+                            </div>
+                            <div class="module-info">
+                                <h4 style="font-size: 0.8rem; margin: 0;">Administrador</h4>
+                            </div>
+                            <i class="ph ph-caret-right module-arrow" style="font-size: 0.8rem;"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
