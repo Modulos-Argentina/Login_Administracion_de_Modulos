@@ -1,26 +1,7 @@
 @model List<Login_Administracion_de_Modulos.Areas.Modulo05.Models.TicketAveriaItem>
 @{
-    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
-    {
-        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
-    }
+    Layout = null;
     ViewData["Title"] = "Mis Reportes de Averías";
-    ViewData["Role"] = "Docente Académico";
-}
-
-@section SidebarNav {
-    <a href="/Modulo05/AveriaDocente/Reporte" class="nav-item">
-        <i class="ph ph-warning-octagon"></i>
-        <span>Reportar Avería</span>
-    </a>
-    <a href="/Modulo05/AveriaDocente/MisReportes" class="nav-item active">
-        <i class="ph ph-clipboard-text"></i>
-        <span>Mis Reportes</span>
-    </a>
-    <a href="/Dashboard/Docente" class="nav-item">
-        <i class="ph ph-arrow-u-up-left"></i>
-        <span>Portal Docente</span>
-    </a>
 }
 
 <div class="page-header" style="margin-bottom: 2rem;">

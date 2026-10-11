@@ -1,25 +1,6 @@
 @{
-    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
-    {
-        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
-    }
+    Layout = null;
     ViewData["Title"] = "Reporte Rápido de Averías de Aula";
-    ViewData["Role"] = "Docente Académico";
-}
-
-@section SidebarNav {
-    <a href="/Modulo05/AveriaDocente/Reporte" class="nav-item active">
-        <i class="ph ph-warning-octagon"></i>
-        <span>Reportar Avería</span>
-    </a>
-    <a href="/Modulo05/AveriaDocente/MisReportes" class="nav-item">
-        <i class="ph ph-clipboard-text"></i>
-        <span>Mis Reportes</span>
-    </a>
-    <a href="/Dashboard/Docente" class="nav-item">
-        <i class="ph ph-arrow-u-up-left"></i>
-        <span>Portal Docente</span>
-    </a>
 }
 
 <style>
@@ -130,8 +111,8 @@
             <h1>Reporte Rápido de Averías de Aula</h1>
             <p style="color: var(--text-secondary); margin: 0;">Notifique al instante fallas técnicas en laboratorios o aulas para asistencia inmediata de Soporte</p>
         </div>
-        <a href="/Modulo05/AveriaDocente/MisReportes" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
-            <i class="ph ph-clipboard-text"></i> Ver Mis Reportes
+        <a href="/Dashboard/Docente" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="ph ph-arrow-left"></i> Volver al Portal Docente
         </a>
     </div>
 </div>

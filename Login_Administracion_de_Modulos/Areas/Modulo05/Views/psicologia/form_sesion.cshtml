@@ -1,29 +1,6 @@
 @{
-    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
-    {
-        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
-    }
+    Layout = null;
     ViewData["Title"] = "Registro de Sesión Psicológica";
-    ViewData["Role"] = "Bienestar Estudiantil";
-}
-
-@section SidebarNav {
-    <a href="/Modulo05/Psicologia/Panel" class="nav-item">
-        <i class="ph ph-brain"></i>
-        <span>Panel Psicología</span>
-    </a>
-    <a href="/Modulo05/Psicologia/FormSesion" class="nav-item active">
-        <i class="ph ph-plus-circle"></i>
-        <span>Nueva Sesión</span>
-    </a>
-    <a href="/Modulo05/Psicologia/ExpedienteAlumno" class="nav-item">
-        <i class="ph ph-folder-user"></i>
-        <span>Expediente Alumno</span>
-    </a>
-    <a href="/Dashboard/Psicologia" class="nav-item">
-        <i class="ph ph-arrow-u-up-left"></i>
-        <span>Volver al Dashboard</span>
-    </a>
 }
 
 <style>
@@ -198,8 +175,8 @@
             <h1>Nueva Sesión de Atención Psicológica</h1>
             <p>Registro confidencial de consulta, motivo, diagnóstico y notas de evolución clínica</p>
         </div>
-        <a href="/Modulo05/Psicologia/Panel" class="psy-btn-clear" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
-            <i class="ph ph-arrow-left"></i> Volver al Panel
+        <a href="/Dashboard/Psicologia" class="psy-btn-clear" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="ph ph-arrow-left"></i> Volver al Dashboard
         </a>
     </div>
 </div>

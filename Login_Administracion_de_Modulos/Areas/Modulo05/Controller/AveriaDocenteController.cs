@@ -43,13 +43,19 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 
         // GET: /Modulo05/AveriaDocente/MisReportes
         [HttpGet("MisReportes")]
-        public IActionResult MisReportes()
+        public IActionResult MisReportes(bool partial = false)
         {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (!partial && !isAjax)
+            {
+                return Redirect("/Dashboard/Docente");
+            }
+
             ViewData["Title"] = "Mis Reportes de Averías";
             ViewData["Role"] = "Docente Académico";
             int docenteId = 1; // Docente en sesión
             var reportes = _ticketRepo.ObtenerReportesPorDocente(docenteId);
-            return View("~/Areas/Modulo05/Views/averias_docente/mis_reportes.cshtml", reportes);
+            return PartialView("~/Areas/Modulo05/Views/averias_docente/mis_reportes.cshtml", reportes);
         }
 
         // POST: /Modulo05/AveriaDocente/GuardarReporte

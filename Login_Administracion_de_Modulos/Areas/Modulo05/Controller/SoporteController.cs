@@ -27,13 +27,19 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
         [HttpGet("")]
         [HttpGet("Consola")]
         [HttpGet("ConsolaPrincipal")]
-        public IActionResult ConsolaPrincipal(string? estado = null)
+        public IActionResult ConsolaPrincipal(string? estado = null, bool partial = false)
         {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (!partial && !isAjax)
+            {
+                return Redirect("/Dashboard/Soporte");
+            }
+
             ViewData["Title"] = "Consola Técnica de Soporte TI";
             ViewData["Role"] = "Jefe de Soporte";
             var tickets = _ticketRepo.ObtenerTodosTickets(estado);
             ViewBag.FiltroEstado = estado;
-            return View("~/Areas/Modulo05/Views/soporte_tecnico/consola_principal.cshtml", tickets);
+            return PartialView("~/Areas/Modulo05/Views/soporte_tecnico/consola_principal.cshtml", tickets);
         }
 
         // GET: /Modulo05/Soporte/FormAtenderTicket?id=...
@@ -61,12 +67,19 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 
         // GET: /Modulo05/Soporte/HistorialEquipos
         [HttpGet("HistorialEquipos")]
-        public IActionResult HistorialEquipos(string? filtro = null)
+        public IActionResult HistorialEquipos(string? filtro = null, bool partial = false)
         {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             ViewData["Title"] = "Historial y Trazabilidad de Equipos";
             ViewData["Role"] = "Jefe de Soporte";
             var equipos = _activoRepo.ListarActivos(filtro);
             ViewBag.Filtro = filtro;
+
+            if (partial || isAjax)
+            {
+                return PartialView("~/Areas/Modulo05/Views/soporte_tecnico/historial_equipos.cshtml", equipos);
+            }
+
             return View("~/Areas/Modulo05/Views/soporte_tecnico/historial_equipos.cshtml", equipos);
         }
 

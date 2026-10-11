@@ -21,11 +21,11 @@
         <i class="ph ph-exam"></i>
         <span>Calificaciones</span>
     </a>
-    <a href="/Modulo05/AveriaDocente/Reporte" class="nav-item" id="nav-doc-reportar">
+    <a href="javascript:void(0)" class="nav-item" id="nav-doc-reportar" onclick="cargarReporteDocente(this)">
         <i class="ph ph-warning-octagon"></i>
         <span>Reportar Avería (M05)</span>
     </a>
-    <a href="/Modulo05/AveriaDocente/MisReportes" class="nav-item" id="nav-doc-mis-reportes">
+    <a href="javascript:void(0)" class="nav-item" id="nav-doc-mis-reportes" onclick="cargarMisReportesDocente(this)">
         <i class="ph ph-clipboard-text"></i>
         <span>Mis Reportes (M05)</span>
     </a>
@@ -182,6 +182,11 @@
             </div>
         </form>
     </div>
+    <!-- Contenedor Dinámico Formulario Reporte Avería (M05) -->
+    <div id="seccion-reportar-averia" class="doc-section" style="display: none;"></div>
+
+    <!-- Contenedor Dinámico Historial de Reportes (M05) -->
+    <div id="seccion-mis-reportes" class="doc-section" style="display: none;"></div>
 </div>
 
 <script>
@@ -197,5 +202,73 @@
         }
 
         if (el) el.classList.add('active');
+    }
+
+    function cargarReporteDocente(el) {
+        mostrarSeccionDocente('seccion-reportar-averia', el);
+        const container = document.getElementById('seccion-reportar-averia');
+
+        if (!container.dataset.loaded) {
+            container.innerHTML = `
+                <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 1rem; display: block;"></i>
+                    <p>Cargando formulario de reporte de averías de Módulo 05...</p>
+                </div>
+            `;
+
+            fetch('/Modulo05/AveriaDocente/Reporte?partial=true', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.text())
+            .then(html => {
+                container.innerHTML = html;
+                container.dataset.loaded = "true";
+
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+            })
+            .catch(err => {
+                container.innerHTML = `<div style="padding: 2rem; color: #ef4444;">Error al cargar formulario: ${err.message}</div>`;
+            });
+        }
+    }
+
+    function cargarMisReportesDocente(el) {
+        mostrarSeccionDocente('seccion-mis-reportes', el);
+        const container = document.getElementById('seccion-mis-reportes');
+
+        if (!container.dataset.loaded) {
+            container.innerHTML = `
+                <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 1rem; display: block;"></i>
+                    <p>Cargando lista de reportes de Módulo 05...</p>
+                </div>
+            `;
+
+            fetch('/Modulo05/AveriaDocente/MisReportes?partial=true', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.text())
+            .then(html => {
+                container.innerHTML = html;
+                container.dataset.loaded = "true";
+
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+            })
+            .catch(err => {
+                container.innerHTML = `<div style="padding: 2rem; color: #ef4444;">Error al cargar reportes: ${err.message}</div>`;
+            });
+        }
     }
 </script>

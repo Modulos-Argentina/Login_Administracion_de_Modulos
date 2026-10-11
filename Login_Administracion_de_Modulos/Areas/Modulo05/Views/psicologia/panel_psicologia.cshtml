@@ -1,29 +1,6 @@
 @{
-    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
-    {
-        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
-    }
+    Layout = null;
     ViewData["Title"] = "Panel de Psicología y Bienestar";
-    ViewData["Role"] = "Bienestar Estudiantil";
-}
-
-@section SidebarNav {
-    <a href="/Modulo05/Psicologia/Panel" class="nav-item active">
-        <i class="ph ph-brain"></i>
-        <span>Panel Psicología</span>
-    </a>
-    <a href="/Modulo05/Psicologia/FormSesion" class="nav-item">
-        <i class="ph ph-plus-circle"></i>
-        <span>Nueva Sesión</span>
-    </a>
-    <a href="/Modulo05/Psicologia/ExpedienteAlumno" class="nav-item">
-        <i class="ph ph-folder-user"></i>
-        <span>Expediente Alumno</span>
-    </a>
-    <a href="/Dashboard/Psicologia" class="nav-item">
-        <i class="ph ph-arrow-u-up-left"></i>
-        <span>Volver al Dashboard</span>
-    </a>
 }
 
 <div class="page-header" style="margin-bottom: 2rem;">

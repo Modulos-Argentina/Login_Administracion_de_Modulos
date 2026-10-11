@@ -1,26 +1,7 @@
 @model List<Login_Administracion_de_Modulos.Areas.Modulo05.Models.ActivoHardwareItem>
 @{
-    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
-    {
-        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
-    }
+    Layout = null;
     ViewData["Title"] = "Historial y Trazabilidad de Equipos";
-    ViewData["Role"] = "Jefe de Soporte";
-}
-
-@section SidebarNav {
-    <a href="/Modulo05/Soporte/ConsolaPrincipal" class="nav-item">
-        <i class="ph ph-desktop"></i>
-        <span>Consola Técnica</span>
-    </a>
-    <a href="/Modulo05/Soporte/HistorialEquipos" class="nav-item active">
-        <i class="ph ph-hard-drives"></i>
-        <span>Historial Equipos</span>
-    </a>
-    <a href="/Dashboard/Soporte" class="nav-item">
-        <i class="ph ph-arrow-u-up-left"></i>
-        <span>Dashboard General</span>
-    </a>
 }
 
 <div class="page-header" style="margin-bottom: 2rem;">
@@ -31,8 +12,8 @@
             </h1>
             <p style="color: var(--text-secondary); margin: 0;">Consulta de historial de fallas, mantenimiento y ubicación de equipos en laboratorios</p>
         </div>
-        <a href="/Modulo05/Soporte/ConsolaPrincipal" class="btn" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
-            <i class="ph ph-desktop"></i> Ir a la Consola
+        <a href="/Dashboard/Soporte" class="btn" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="ph ph-arrow-left"></i> Volver al Dashboard
         </a>
     </div>
 </div>

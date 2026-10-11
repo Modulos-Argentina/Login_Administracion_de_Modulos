@@ -1,30 +1,7 @@
 @model List<Login_Administracion_de_Modulos.Areas.Modulo05.Models.MedicamentoItem>
 @{
-    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
-    {
-        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
-    }
+    Layout = null;
     ViewData["Title"] = "Panel de Enfermería y Tópico";
-    ViewData["Role"] = "Enfermería (Tópico)";
-}
-
-@section SidebarNav {
-    <a href="/Modulo05/Enfermeria/Panel" class="nav-item active">
-        <i class="ph ph-heartbeat"></i>
-        <span>Panel Tópico</span>
-    </a>
-    <a href="/Modulo05/Enfermeria/FormAtencion" class="nav-item">
-        <i class="ph ph-plus-circle"></i>
-        <span>Nueva Atención</span>
-    </a>
-    <a href="/Modulo05/Enfermeria/HistorialPaciente" class="nav-item">
-        <i class="ph ph-clipboard-text"></i>
-        <span>Historial Paciente</span>
-    </a>
-    <a href="/Dashboard/Topico" class="nav-item">
-        <i class="ph ph-arrow-u-up-left"></i>
-        <span>Volver al Dashboard</span>
-    </a>
 }
 
 <div class="page-header" style="margin-bottom: 2rem;">

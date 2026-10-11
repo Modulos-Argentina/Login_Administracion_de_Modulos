@@ -1,26 +1,7 @@
 @model List<Login_Administracion_de_Modulos.Areas.Modulo05.Models.TicketAveriaItem>
 @{
-    if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest" && Context.Request.Query["partial"] != "true")
-    {
-        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
-    }
+    Layout = null;
     ViewData["Title"] = "Consola Técnica de Soporte TI";
-    ViewData["Role"] = "Jefe de Soporte";
-}
-
-@section SidebarNav {
-    <a href="/Modulo05/Soporte/ConsolaPrincipal" class="nav-item active">
-        <i class="ph ph-desktop"></i>
-        <span>Consola Técnica</span>
-    </a>
-    <a href="/Modulo05/Soporte/HistorialEquipos" class="nav-item">
-        <i class="ph ph-hard-drives"></i>
-        <span>Historial Equipos</span>
-    </a>
-    <a href="/Dashboard/Soporte" class="nav-item">
-        <i class="ph ph-arrow-u-up-left"></i>
-        <span>Dashboard General</span>
-    </a>
 }
 
 <div class="page-header" style="margin-bottom: 2rem;">

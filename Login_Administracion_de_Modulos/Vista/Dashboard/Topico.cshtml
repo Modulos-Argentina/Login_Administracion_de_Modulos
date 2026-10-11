@@ -17,7 +17,7 @@
         <i class="ph ph-clipboard-text"></i>
         <span>Historial de Pacientes</span>
     </a>
-    <a href="/Modulo05/Enfermeria/Panel" class="nav-item" id="nav-botica">
+    <a href="javascript:void(0)" class="nav-item" id="nav-botica" onclick="mostrarBotica()">
         <i class="ph ph-pill"></i>
         <span>Control de Botica (M05)</span>
     </a>
@@ -171,6 +171,47 @@
         </div>
     </div>
 
+    <!-- 4. VISTA BOTICA Y MEDICAMENTOS (Integrada en la raíz) -->
+    <div id="view-botica-container" style="display: none;">
+        <div class="page-header" style="margin-bottom: 2rem;">
+            <h1>Control de Stock en Botica de Tópico</h1>
+            <p>Catálogo de medicamentos, existencias y alertas de reposición</p>
+            <div class="header-accent"></div>
+        </div>
+
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.6rem;">
+                    <i class="ph ph-first-aid" style="color: #10b981;"></i> Catálogo de Botica Institucional
+                </h3>
+                <button type="button" onclick="cargarBoticaMedicamentos()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+                    <i class="ph ph-arrows-clockwise"></i> Actualizar
+                </button>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;">
+                            <th style="padding: 0.75rem;">ID</th>
+                            <th style="padding: 0.75rem;">Medicamento</th>
+                            <th style="padding: 0.75rem;">Presentación</th>
+                            <th style="padding: 0.75rem;">Stock Disponible</th>
+                            <th style="padding: 0.75rem;">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="boticaTableBody">
+                        <tr>
+                            <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+                                <i class="ph ph-spinner ph-spin" style="font-size: 1.5rem;"></i> Cargando inventario de botica...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @section Scripts {
@@ -181,16 +222,15 @@
             if (target) target.classList.add('active');
         }
 
-        // Carga dinámica de Login_Administracion_de_Modulos\Areas\Modulo05\Views\AtencionClinica\Create.cshtml
         function cargarAtencionClinica() {
             setActiveNav('nav-atencion');
 
             document.getElementById('view-dashboard').style.display = 'none';
             document.getElementById('view-historial-container').style.display = 'none';
+            document.getElementById('view-botica-container').style.display = 'none';
             const container = document.getElementById('view-atencion-container');
             container.style.display = 'block';
 
-            // Si aún no está cargado el contenido en el DOM, lo solicitamos vía fetch
             if (!container.dataset.loaded) {
                 container.innerHTML = `
                     <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
@@ -214,7 +254,6 @@
                     container.innerHTML = html;
                     container.dataset.loaded = "true";
 
-                    // Ejecutar scripts incrustados dentro de la vista parcial cargada
                     const scripts = container.querySelectorAll('script');
                     scripts.forEach(oldScript => {
                         const newScript = document.createElement('script');
@@ -239,6 +278,7 @@
             setActiveNav('nav-dashboard');
             document.getElementById('view-atencion-container').style.display = 'none';
             document.getElementById('view-historial-container').style.display = 'none';
+            document.getElementById('view-botica-container').style.display = 'none';
             document.getElementById('view-dashboard').style.display = 'block';
         }
 
@@ -246,7 +286,53 @@
             setActiveNav('nav-historial');
             document.getElementById('view-dashboard').style.display = 'none';
             document.getElementById('view-atencion-container').style.display = 'none';
+            document.getElementById('view-botica-container').style.display = 'none';
             document.getElementById('view-historial-container').style.display = 'block';
+        }
+
+        function mostrarBotica() {
+            setActiveNav('nav-botica');
+            document.getElementById('view-dashboard').style.display = 'none';
+            document.getElementById('view-atencion-container').style.display = 'none';
+            document.getElementById('view-historial-container').style.display = 'none';
+            document.getElementById('view-botica-container').style.display = 'block';
+            cargarBoticaMedicamentos();
+        }
+
+        function cargarBoticaMedicamentos() {
+            const tableBody = document.getElementById('boticaTableBody');
+            if (!tableBody) return;
+
+            fetch('/Modulo05/Enfermeria/Medicamentos')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.data && data.data.length > 0) {
+                        tableBody.innerHTML = '';
+                        data.data.forEach(med => {
+                            const tr = document.createElement('tr');
+                            tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                            tr.style.color = '#e2e8f0';
+
+                            const stockBadge = med.stockActual <= 5
+                                ? `<span style="background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 700; font-size: 0.85rem;">${med.stockActual} unids (Crítico)</span>`
+                                : `<span style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 700; font-size: 0.85rem;">${med.stockActual} unidades</span>`;
+
+                            tr.innerHTML = `
+                                <td style="padding: 0.75rem; font-weight: 600;">#${med.idMedicamento}</td>
+                                <td style="padding: 0.75rem; font-weight: 700; color: #fff;">${med.nombre}</td>
+                                <td style="padding: 0.75rem; color: var(--text-secondary);">${med.presentacion || '-'}</td>
+                                <td style="padding: 0.75rem;">${stockBadge}</td>
+                                <td style="padding: 0.75rem;"><span style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">${med.estado || 'Activo'}</span></td>
+                            `;
+                            tableBody.appendChild(tr);
+                        });
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No se registraron medicamentos en botica.</td></tr>';
+                    }
+                })
+                .catch(err => {
+                    tableBody.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: #ef4444;">Error al cargar datos de botica.</td></tr>';
+                });
         }
 
         function cargarHistorialTopico() {

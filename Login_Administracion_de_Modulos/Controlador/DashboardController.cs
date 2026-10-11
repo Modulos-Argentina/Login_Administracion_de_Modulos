@@ -49,7 +49,7 @@ namespace Login_Administracion_de_Modulos.Controlador
         public IActionResult Psicologia()
         {
             CargarDatosSesion("Lic. Juan Psicólogo", "Psicología");
-            return View("~/Areas/Modulo05/Views/psicologia/panel_psicologia.cshtml");
+            return View("~/Vista/Dashboard/Psicologia.cshtml");
         }
 
         [HttpGet("/Dashboard/Docente")]

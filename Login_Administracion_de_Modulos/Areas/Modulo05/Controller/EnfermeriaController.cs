@@ -22,14 +22,12 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
         }
 
         // GET: /Modulo05/Enfermeria o /Modulo05/Enfermeria/Panel
+        // Redirige al panel centralizado en la raíz (Vista/Dashboard/Topico.cshtml)
         [HttpGet("")]
         [HttpGet("Panel")]
         public IActionResult Panel()
         {
-            ViewData["Title"] = "Tópico y Enfermería";
-            ViewData["Role"] = "Enfermería (Tópico)";
-            var medicamentos = _repo.ListarMedicamentos();
-            return View("~/Areas/Modulo05/Views/enfermeria/panel_enfermeria.cshtml", medicamentos);
+            return Redirect("/Dashboard/Topico");
         }
 
         // GET: /Modulo05/Enfermeria/Create o /Modulo05/Enfermeria/FormAtencion
@@ -52,8 +50,9 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 
         // GET: /Modulo05/Enfermeria/HistorialPaciente
         [HttpGet("HistorialPaciente")]
-        public IActionResult HistorialPaciente(string? dni = null)
+        public IActionResult HistorialPaciente(string? dni = null, bool partial = false)
         {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             ViewData["Title"] = "Historial Clínico del Paciente";
             ViewData["Role"] = "Enfermería (Tópico)";
             var lista = !string.IsNullOrWhiteSpace(dni) 
@@ -61,6 +60,10 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                 : new List<AtencionMedicaItem>();
 
             ViewBag.DniBuscado = dni;
+            if (partial || isAjax)
+            {
+                return PartialView("~/Areas/Modulo05/Views/enfermeria/historial_paciente.cshtml", lista);
+            }
             return View("~/Areas/Modulo05/Views/enfermeria/historial_paciente.cshtml", lista);
         }
 

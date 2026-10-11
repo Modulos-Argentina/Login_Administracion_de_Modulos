@@ -22,13 +22,12 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
         }
 
         // GET: /Modulo05/Psicologia o /Modulo05/Psicologia/Panel
+        // Redirige al panel centralizado en la raíz (Vista/Dashboard/Psicologia.cshtml)
         [HttpGet("")]
         [HttpGet("Panel")]
         public IActionResult Panel()
         {
-            ViewData["Title"] = "Bienestar Psicológico";
-            ViewData["Role"] = "Psicología";
-            return View("~/Areas/Modulo05/Views/psicologia/panel_psicologia.cshtml");
+            return Redirect("/Dashboard/Psicologia");
         }
 
         // GET: /Modulo05/Psicologia/FormSesion o /Modulo05/Psicologia/Create
@@ -50,15 +49,20 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 
         // GET: /Modulo05/Psicologia/ExpedienteAlumno
         [HttpGet("ExpedienteAlumno")]
-        public IActionResult ExpedienteAlumno(string? dni = null)
+        public IActionResult ExpedienteAlumno(string? dni = null, bool partial = false)
         {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             ViewData["Title"] = "Expediente Confidencial del Alumno";
-            ViewData["Role"] = "Psicología";
+            ViewData["Role"] = "Bienestar Estudiantil";
             var historial = !string.IsNullOrWhiteSpace(dni) 
                 ? _repo.ObtenerExpedientePorDni(dni) 
                 : new List<SesionPsicologicaItem>();
 
             ViewBag.DniBuscado = dni;
+            if (partial || isAjax)
+            {
+                return PartialView("~/Areas/Modulo05/Views/psicologia/expediente_alumno.cshtml", historial);
+            }
             return View("~/Areas/Modulo05/Views/psicologia/expediente_alumno.cshtml", historial);
         }
 
