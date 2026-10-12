@@ -1,7 +1,16 @@
 @model List<Login_Administracion_de_Modulos.Areas.Modulo05.Models.SesionPsicologicaItem>
 @{
-    Layout = null;
+    bool isPartial = Context.Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Context.Request.Query["partial"] == "true";
+    if (!isPartial)
+    {
+        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
+    }
+    else
+    {
+        Layout = null;
+    }
     ViewData["Title"] = "Expediente Confidencial del Alumno";
+    ViewData["Role"] = "Bienestar Estudiantil";
 }
 
 <div class="page-header" style="margin-bottom: 2rem;">
@@ -12,23 +21,31 @@
             </h1>
             <p style="color: var(--text-secondary); margin: 0;">Registro acumulado de orientaciones, evolución diagnóstica y acuerdos de bienestar</p>
         </div>
-        <a href="/Modulo05/Psicologia/FormSesion" class="btn btn-primary" style="background: linear-gradient(135deg, #6366f1, #a855f7); border: none; color: white; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
-            <i class="ph-bold ph-plus"></i> Nueva Sesión
-        </a>
+        <div style="display: flex; gap: 0.75rem;">
+            @if (!string.IsNullOrEmpty(ViewBag.DniBuscado as string))
+            {
+                <a href="/Modulo05/Psicologia/FormSesion?dni=@ViewBag.DniBuscado" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: white; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="ph-bold ph-plus-circle"></i> Nueva Sesión (DNI: @ViewBag.DniBuscado)
+                </a>
+            }
+            <a href="/Modulo05/Psicologia/FormSesion" class="btn btn-primary" style="background: linear-gradient(135deg, #6366f1, #a855f7); border: none; color: white; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                <i class="ph-bold ph-plus"></i> Nueva Sesión
+            </a>
+        </div>
     </div>
 </div>
 
 <!-- Buscador de Expediente por DNI -->
 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
-    <form method="get" action="/Modulo05/Psicologia/ExpedienteAlumno" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+    <form id="formBuscarExpediente" method="get" action="/Modulo05/Psicologia/ExpedienteAlumno" onsubmit="buscarExpedienteSubmit(event)" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
         <label for="dni" style="color: #fff; font-weight: 600; font-size: 0.95rem;">Buscar Alumno (DNI):</label>
         <input type="text" id="dni" name="dni" value="@(ViewBag.DniBuscado ?? "")" placeholder="Ingrese 8 dígitos de DNI..." maxlength="8" style="background: rgba(15,15,20,0.8); border: 1px solid var(--border-glass); color: #fff; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; width: 260px;" required />
-        <button type="submit" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+        <button type="submit" id="btnBuscarExpediente" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
             <i class="ph-bold ph-lock-key"></i> Abrir Expediente
         </button>
         @if (!string.IsNullOrEmpty(ViewBag.DniBuscado as string))
         {
-            <a href="/Modulo05/Psicologia/ExpedienteAlumno" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; margin-left: 0.5rem;">Limpiar filtro</a>
+            <a href="/Modulo05/Psicologia/ExpedienteAlumno" onclick="limpiarExpedienteFiltro(event)" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; margin-left: 0.5rem;">Limpiar filtro</a>
         }
     </form>
 </div>
@@ -91,3 +108,59 @@
         </div>
     }
 </div>
+
+<script>
+    function buscarExpedienteSubmit(e) {
+        const dni = document.getElementById('dni').value.trim();
+        const container = document.getElementById('view-expediente-container');
+
+        // Si estamos embebidos en el Dashboard SPA, cargamos vía fetch para no recargar la página entera
+        if (container) {
+            e.preventDefault();
+            container.innerHTML = `
+                <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2.5rem; color: #a855f7; margin-bottom: 1rem; display: block;"></i>
+                    <p>Consultando expediente del alumno en la base de datos...</p>
+                </div>
+            `;
+            fetch(`/Modulo05/Psicologia/ExpedienteAlumno?dni=${encodeURIComponent(dni)}&partial=true`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.text())
+            .then(html => {
+                container.innerHTML = html;
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+            })
+            .catch(err => {
+                alert('Error al consultar expediente: ' + err.message);
+            });
+        }
+    }
+
+    function limpiarExpedienteFiltro(e) {
+        const container = document.getElementById('view-expediente-container');
+        if (container) {
+            e.preventDefault();
+            fetch('/Modulo05/Psicologia/ExpedienteAlumno?partial=true', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.text())
+            .then(html => {
+                container.innerHTML = html;
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+            });
+        }
+    }
+</script>

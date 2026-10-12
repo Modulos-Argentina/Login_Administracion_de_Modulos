@@ -549,6 +549,19 @@
         }
 
         inicializarFechaActual();
+
+        // Autocargar DNI si fue proporcionado por parámetro o ViewBag
+        setTimeout(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const dniParam = '@(ViewBag.DniInicial ?? "")' || urlParams.get('dni');
+            if (dniParam && dniParam.trim().length === 8) {
+                const dniInput = document.getElementById('dniBusqueda');
+                if (dniInput) {
+                    dniInput.value = dniParam.trim();
+                    buscarAlumnoDni();
+                }
+            }
+        }, 150);
     })();
 
     function mostrarToast(mensaje, tipo = 'success') {
