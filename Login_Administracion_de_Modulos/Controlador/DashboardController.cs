@@ -109,5 +109,29 @@ namespace Login_Administracion_de_Modulos.Controlador
             CargarDatosSesion("Lic. Walter Computación", "Jefe de Taller Computación");
             return View("~/Vista/Dashboard/JefeComputacion.cshtml");
         }
+
+        [HttpGet("/Dashboard/JefeAdministracion")]
+        [HttpGet("/Dashboard/TallerAdministracion")]
+        public IActionResult JefeAdministracion()
+        {
+            CargarDatosSesion("Lic. Marcos Administración", "Jefe de Taller Administración");
+            return View("~/Vista/Dashboard/JefeAdministracion.cshtml");
+        }
+
+        [HttpGet("/Dashboard/JefeContabilidad")]
+        [HttpGet("/Dashboard/TallerContabilidad")]
+        public IActionResult JefeContabilidad()
+        {
+            CargarDatosSesion("C.P.C. Elena Contabilidad", "Jefe de Taller Contabilidad");
+            return View("~/Vista/Dashboard/JefeContabilidad.cshtml");
+        }
+
+        [HttpGet("/Dashboard/EncargadoInventario")]
+        [HttpGet("/Dashboard/Inventario")]
+        public IActionResult EncargadoInventario()
+        {
+            CargarDatosSesion("Téc. Sergio Inventario", "Encargado de Inventario");
+            return View("~/Vista/Dashboard/EncargadoInventario.cshtml");
+        }
     }
 }

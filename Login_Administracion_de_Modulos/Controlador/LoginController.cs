@@ -280,6 +280,27 @@ namespace Login_Administracion_de_Modulos.Controlador
                     rolDemo = "Jefe de Taller Computación";
                     idDemo = 110;
                     break;
+                case "taller-administracion":
+                case "jefe-administracion":
+                case "admin-taller":
+                    nombreDemo = "Lic. Marcos Administración (Demo)";
+                    rolDemo = "Jefe de Taller Administración";
+                    idDemo = 111;
+                    break;
+                case "taller-contabilidad":
+                case "jefe-contabilidad":
+                case "contabilidad":
+                    nombreDemo = "C.P.C. Elena Contabilidad (Demo)";
+                    rolDemo = "Jefe de Taller Contabilidad";
+                    idDemo = 112;
+                    break;
+                case "inventario":
+                case "encargado-inventario":
+                case "inventario-general":
+                    nombreDemo = "Téc. Sergio Inventario (Demo)";
+                    rolDemo = "Encargado de Inventario";
+                    idDemo = 113;
+                    break;
                 default:
                     nombreDemo = "Personal Demo";
                     rolDemo = "Enfermería (Tópico)";
@@ -317,8 +338,17 @@ namespace Login_Administracion_de_Modulos.Controlador
         {
             if (string.IsNullOrWhiteSpace(rolNombre)) return "/Dashboard/Topico";
 
-            if (rolNombre.Contains("Taller", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Jefe de Taller", StringComparison.OrdinalIgnoreCase) || (rolNombre.Contains("Computación", StringComparison.OrdinalIgnoreCase) && rolNombre.Contains("Jefe", StringComparison.OrdinalIgnoreCase)))
+            if (rolNombre.Contains("Encargado de Inventario", StringComparison.OrdinalIgnoreCase) || (rolNombre.Contains("Inventario", StringComparison.OrdinalIgnoreCase) && !rolNombre.Contains("Jefe", StringComparison.OrdinalIgnoreCase)))
+                return "/Dashboard/EncargadoInventario";
+
+            if ((rolNombre.Contains("Taller", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Jefe", StringComparison.OrdinalIgnoreCase)) && rolNombre.Contains("Computación", StringComparison.OrdinalIgnoreCase))
                 return "/Dashboard/JefeComputacion";
+
+            if ((rolNombre.Contains("Taller", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Jefe", StringComparison.OrdinalIgnoreCase)) && (rolNombre.Contains("Administración", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Administracion", StringComparison.OrdinalIgnoreCase)) && !rolNombre.Contains("General", StringComparison.OrdinalIgnoreCase) && !rolNombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+                return "/Dashboard/JefeAdministracion";
+
+            if ((rolNombre.Contains("Taller", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Jefe", StringComparison.OrdinalIgnoreCase)) && (rolNombre.Contains("Contabilidad", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Conta", StringComparison.OrdinalIgnoreCase)))
+                return "/Dashboard/JefeContabilidad";
 
             if (rolNombre.Contains("Jefe General", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Almacen", StringComparison.OrdinalIgnoreCase))
                 return "/Dashboard/JefeGeneral";
