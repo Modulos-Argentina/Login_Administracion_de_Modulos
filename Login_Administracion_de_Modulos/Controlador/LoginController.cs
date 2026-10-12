@@ -265,6 +265,21 @@ namespace Login_Administracion_de_Modulos.Controlador
                     rolDemo = "Administrador";
                     idDemo = 108;
                     break;
+                case "jefegeneral":
+                case "jefe-general":
+                case "jefe":
+                case "almacen":
+                    nombreDemo = "Ing. Roberto Alarcón (Demo)";
+                    rolDemo = "Jefe General";
+                    idDemo = 109;
+                    break;
+                case "computacion":
+                case "taller-computacion":
+                case "jefe-computacion":
+                    nombreDemo = "Lic. Walter Computación (Demo)";
+                    rolDemo = "Jefe de Taller Computación";
+                    idDemo = 110;
+                    break;
                 default:
                     nombreDemo = "Personal Demo";
                     rolDemo = "Enfermería (Tópico)";
@@ -301,6 +316,12 @@ namespace Login_Administracion_de_Modulos.Controlador
         public static string ObtenerRutaDashboardPorRol(string rolNombre)
         {
             if (string.IsNullOrWhiteSpace(rolNombre)) return "/Dashboard/Topico";
+
+            if (rolNombre.Contains("Taller", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Jefe de Taller", StringComparison.OrdinalIgnoreCase) || (rolNombre.Contains("Computación", StringComparison.OrdinalIgnoreCase) && rolNombre.Contains("Jefe", StringComparison.OrdinalIgnoreCase)))
+                return "/Dashboard/JefeComputacion";
+
+            if (rolNombre.Contains("Jefe General", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Almacen", StringComparison.OrdinalIgnoreCase))
+                return "/Dashboard/JefeGeneral";
 
             if (rolNombre.Contains("Alumno", StringComparison.OrdinalIgnoreCase) || rolNombre.Contains("Estudiante", StringComparison.OrdinalIgnoreCase))
                 return "/Dashboard/Alumno";

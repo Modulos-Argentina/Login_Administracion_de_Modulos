@@ -93,5 +93,21 @@ namespace Login_Administracion_de_Modulos.Controlador
             CargarDatosSesion("Administrador del Sistema", "Administrador");
             return View("~/Vista/Dashboard/Administrador.cshtml");
         }
+
+        [HttpGet("/Dashboard/JefeGeneral")]
+        [HttpGet("/Dashboard/Jefe")]
+        public IActionResult JefeGeneral()
+        {
+            CargarDatosSesion("Ing. Roberto Alarcón", "Jefe General");
+            return View("~/Vista/Dashboard/JefeGeneral.cshtml");
+        }
+
+        [HttpGet("/Dashboard/JefeComputacion")]
+        [HttpGet("/Dashboard/TallerComputacion")]
+        public IActionResult JefeComputacion()
+        {
+            CargarDatosSesion("Lic. Walter Computación", "Jefe de Taller Computación");
+            return View("~/Vista/Dashboard/JefeComputacion.cshtml");
+        }
     }
 }
