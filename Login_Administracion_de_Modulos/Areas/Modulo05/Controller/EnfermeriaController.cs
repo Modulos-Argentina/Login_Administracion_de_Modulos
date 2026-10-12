@@ -87,6 +87,8 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                         idPersona = paciente.IdPersona,
                         nombres = paciente.Nombres,
                         apellidos = paciente.Apellidos,
+                        carrera = "Desarrollo de Sistemas de Información",
+                        cicloTurno = "IV Ciclo / Turno Noche",
                         tipoSeguro = "SIS Gratuito / EsSalud",
                         alergiasConocidas = "Ninguna reportada en el padrón"
                     });

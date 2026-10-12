@@ -156,8 +156,16 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                         cmdInsert.Parameters.AddWithValue("@fecha_hora", fechaHora);
                         cmdInsert.Parameters.AddWithValue("@motivo", motivo);
                         cmdInsert.Parameters.AddWithValue("@es_alergico", esAlergico);
-                        cmdInsert.Parameters.AddWithValue("@detalle_alergia", string.IsNullOrEmpty(detalleAlergia) ? (object)DBNull.Value : detalleAlergia);
-                        cmdInsert.Parameters.AddWithValue("@seguro_salud", string.IsNullOrEmpty(tipoSeguroSalud) ? (object)DBNull.Value : tipoSeguroSalud);
+                        string seguroMapeado = "NINGUNO";
+                        if (!string.IsNullOrWhiteSpace(tipoSeguroSalud))
+                        {
+                            string s = tipoSeguroSalud.Trim().ToUpperInvariant();
+                            if (s.Contains("SIS")) seguroMapeado = "SIS";
+                            else if (s.Contains("ESSALUD")) seguroMapeado = "ESSALUD";
+                            else if (s.Contains("PRIVADO") || s.Contains("EPS")) seguroMapeado = "EPS";
+                            else seguroMapeado = "NINGUNO";
+                        }
+                        cmdInsert.Parameters.AddWithValue("@seguro_salud", seguroMapeado);
                         
                         string observacionFinal = observaciones ?? "";
                         if (!string.IsNullOrWhiteSpace(medicamentos)) 

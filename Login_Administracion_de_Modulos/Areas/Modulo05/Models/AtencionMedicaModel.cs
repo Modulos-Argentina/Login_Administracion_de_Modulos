@@ -91,7 +91,16 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Models
             cmd.Parameters.AddWithValue("@medicamento_id", (object?)item.MedicamentoId ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@es_alergico", item.EsAlergico);
             cmd.Parameters.AddWithValue("@detalle_alergia", (object?)item.DetalleAlergia ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@seguro_salud", (object?)item.SeguroSalud ?? DBNull.Value);
+            string seguroVal = "NINGUNO";
+            if (!string.IsNullOrWhiteSpace(item.SeguroSalud))
+            {
+                string s = item.SeguroSalud.Trim().ToUpperInvariant();
+                if (s.Contains("SIS")) seguroVal = "SIS";
+                else if (s.Contains("ESSALUD")) seguroVal = "ESSALUD";
+                else if (s.Contains("PRIVADO") || s.Contains("EPS")) seguroVal = "EPS";
+                else seguroVal = "NINGUNO";
+            }
+            cmd.Parameters.AddWithValue("@seguro_salud", seguroVal);
             cmd.Parameters.AddWithValue("@observacion", (object?)item.Observacion ?? DBNull.Value);
 
             int rows = cmd.ExecuteNonQuery();
