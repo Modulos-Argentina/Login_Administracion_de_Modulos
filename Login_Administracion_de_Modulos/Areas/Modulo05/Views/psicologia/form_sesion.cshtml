@@ -1,13 +1,5 @@
 @{
-    bool isPartial = Context.Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Context.Request.Query["partial"] == "true";
-    if (!isPartial)
-    {
-        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
-    }
-    else
-    {
-        Layout = null;
-    }
+    Layout = null;
     ViewData["Title"] = "Registro de Sesión Psicológica";
     ViewData["Role"] = "Bienestar Estudiantil";
 }
