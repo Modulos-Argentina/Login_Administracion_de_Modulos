@@ -133,5 +133,13 @@ namespace Login_Administracion_de_Modulos.Controlador
             CargarDatosSesion("Téc. Sergio Inventario", "Encargado de Inventario");
             return View("~/Vista/Dashboard/EncargadoInventario.cshtml");
         }
+
+        [HttpGet("/Dashboard/Tesoreria")]
+        [HttpGet("/Dashboard/Tesorero")]
+        public IActionResult Tesoreria()
+        {
+            CargarDatosSesion("Marta Beatriz Torres", "Tesorería");
+            return View("~/Vista/Dashboard/Tesoreria.cshtml");
+        }
     }
 }

@@ -301,6 +301,14 @@ namespace Login_Administracion_de_Modulos.Controlador
                     rolDemo = "Encargado de Inventario";
                     idDemo = 113;
                     break;
+                case "tesoreria":
+                case "tesorero":
+                case "pagos":
+                case "vouchers":
+                    nombreDemo = "Marta Beatriz Torres";
+                    rolDemo = "Tesorería";
+                    idDemo = 114;
+                    break;
                 default:
                     nombreDemo = "Personal Demo";
                     rolDemo = "Enfermería (Tópico)";
@@ -370,6 +378,9 @@ namespace Login_Administracion_de_Modulos.Controlador
 
             if (rolNombre.Contains("Secretar", StringComparison.OrdinalIgnoreCase))
                 return "/Dashboard/Secretaria";
+
+            if (rolNombre.Contains("Tesor", StringComparison.OrdinalIgnoreCase))
+                return "/Dashboard/Tesoreria";
 
             if (rolNombre.Contains("Admin", StringComparison.OrdinalIgnoreCase))
                 return "/Dashboard/Administrador";

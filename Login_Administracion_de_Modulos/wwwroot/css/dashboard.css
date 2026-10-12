@@ -1033,8 +1033,388 @@ body {
     color: #a855f7;
 }
 
+/* ========================================================
+   ESTILOS EXCLUSIVOS DEL ROL: TESORERÍA (Trámites y Matrícula)
+   ======================================================== */
 
+.sidebar-brand-tesoreria {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+    margin-bottom: 1rem;
+}
 
+.sidebar-brand-tesoreria .brand-icon-wrap {
+    width: 38px;
+    height: 38px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f59e0b;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
 
+.sidebar-brand-tesoreria .brand-details h5 {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.2;
+}
 
+.sidebar-brand-tesoreria .brand-details p {
+    font-size: 0.7rem;
+    color: #fbbf24;
+    margin: 2px 0 0 0;
+    font-weight: 500;
+}
 
+.nav-item-tesoreria {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 8px;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.86rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-bottom: 0.3rem;
+    position: relative;
+    border: 1px solid transparent;
+}
+
+.nav-item-tesoreria i.nav-icon {
+    font-size: 1.15rem;
+    color: #94a3b8;
+    transition: color 0.2s ease;
+    width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-item-tesoreria .nav-text {
+    flex: 1;
+}
+
+.nav-item-tesoreria:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item-tesoreria:hover i.nav-icon {
+    color: #f8fafc;
+}
+
+.nav-item-tesoreria.active {
+    background: #0f1d38;
+    border: 1px solid rgba(59, 130, 246, 0.45);
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.nav-item-tesoreria.active i.nav-icon {
+    color: #38bdf8;
+}
+
+.tesoreria-badge-pill {
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 1px 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    margin-left: auto;
+}
+
+.tesoreria-profile-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.75rem 0.85rem;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-top: 1.5rem;
+}
+
+.tesoreria-profile-card .avatar-mb {
+    width: 36px;
+    height: 36px;
+    background: #b45309;
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.tesoreria-profile-card .profile-text {
+    flex: 1;
+    overflow: hidden;
+}
+
+.tesoreria-profile-card .profile-text h5 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.tesoreria-profile-card .profile-text p {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin: 1px 0 0 0;
+}
+
+.tesoreria-profile-card .btn-salir-tesoreria {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    color: #cbd5e1;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.tesoreria-profile-card .btn-salir-tesoreria:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+    color: #ffffff;
+}
+
+/* Contenedor Claro Exclusivo de Tesorería (Coincide con captura) */
+.tesoreria-dashboard-light {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    color: #0f172a;
+    min-height: 85vh;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.tesoreria-light-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.tesoreria-light-topbar .crumb-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.tesoreria-light-topbar .actions-group {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.pill-semester {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.bell-btn {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.bell-btn .bell-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-tag-tesoreria {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.kpi-card-light {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.35rem 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.kpi-card-light .kpi-label {
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 500;
+    margin: 0 0 0.4rem 0;
+}
+
+.kpi-card-light .kpi-value {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 0.3rem 0;
+    line-height: 1.1;
+}
+
+.kpi-card-light .kpi-subtext {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.panel-card-light {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.panel-card-light .panel-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+}
+
+.voucher-item-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid #f1f5f9;
+    border-radius: 10px;
+    background: #fafafa;
+    flex-wrap: wrap;
+}
+
+.voucher-item-box .voucher-info-group {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.voucher-thumb-icon {
+    width: 40px;
+    height: 40px;
+    background: #fef9c3;
+    border: 1px solid #fef08a;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ca8a04;
+    font-size: 1.35rem;
+}
+
+.voucher-item-box .voucher-text h4 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.2rem 0;
+}
+
+.voucher-item-box .voucher-text p {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.btn-validar-dark {
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 1.4rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-validar-dark:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+}
+
+.quick-action-btn-light {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.85rem 1.25rem;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    color: #1e293b;
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.quick-action-btn-light:hover {
+    border-color: #94a3b8;
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
