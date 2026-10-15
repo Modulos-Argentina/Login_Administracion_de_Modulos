@@ -1,9 +1,4 @@
-using Login_Administracion_de_Modulos.Seguridad;
-
 var builder = WebApplication.CreateBuilder(args);
-
-// Cargar variables de entorno de .env y variables del sistema (GitHub Secrets / Servidor)
-ConfiguracionSegura.CargarVariablesEntorno(builder);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

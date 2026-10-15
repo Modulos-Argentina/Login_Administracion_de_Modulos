@@ -27,55 +27,15 @@ jobs:
       - name: 3. Compilar el proyecto (Publish)
         run: dotnet publish Login_Administracion_de_Modulos/Login_Administracion_de_Modulos.csproj -c Release -o ./publish_output
 
-      # 4. Inyectar configuración de Producción con GitHub Secrets (y fallback seguro si faltan)
-      - name: 4. Generar appsettings.Production.json
-        shell: bash
-        run: |
-          DB_CONN="${{ secrets.DB_CONNECTION_STRING }}"
-          if [ -z "$DB_CONN" ]; then
-            DB_CONN="Host=aws-0-us-east-2.pooler.supabase.com;Port=6543;Database=postgres;Username=postgres.oxmjxyywxksuwrcgewdg;Password=Adrianito@2026;SSL Mode=Require;Trust Server Certificate=true;Pooling=false;KeepAlive=30;"
-          fi
-
-          GOOGLE_ID="${{ secrets.GOOGLE_CLIENT_ID }}"
-          if [ -z "$GOOGLE_ID" ]; then
-            GOOGLE_ID="52989620561-sira7io6ssrsg6c62fb10pjrtnkv51nm.apps.googleusercontent.com"
-          fi
-
-          GOOGLE_SEC="${{ secrets.GOOGLE_CLIENT_SECRET }}"
-          if [ -z "$GOOGLE_SEC" ]; then
-            GOOGLE_SEC="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"
-          fi
-
-          cat <<EOF > ./publish_output/appsettings.Production.json
-          {
-            "ConnectionStrings": {
-              "DefaultConnection": "$DB_CONN"
-            },
-            "Authentication": {
-              "Google": {
-                "ClientId": "$GOOGLE_ID",
-                "ClientSecret": "$GOOGLE_SEC"
-              }
-            },
-            "Security": {
-              "EnableDemoLogin": true,
-              "AllowLegacyPasswords": true
-            }
-          }
-          EOF
-
-          # Asegurar que la carpeta logs exista para stdout de IIS
-          mkdir -p ./publish_output/logs
-
-      # 5. Apagamos el sitio y esperamos 5 segundos para que Windows suelte la .dll
-      - name: 5. Apagar sitio web temporalmente
+      # 4. Apagamos el sitio y esperamos 5 segundos para que Windows suelte la .dll
+      - name: 4. Apagar sitio web temporalmente
         run: |
           echo "<html><head><meta charset='utf-8'></head><body><h2>Actualizando... vuelva en 1 minuto.</h2></body></html>" > app_offline.htm
           curl -k -T app_offline.htm -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" "ftp://${{ secrets.FTP_SERVER }}/wwwroot/app_offline.htm" || true
           sleep 5
 
-      # 6. Subir los archivos nuevos al hosting
-      - name: 6. Sincronizar archivos por FTP
+      # 5. Subir los archivos nuevos al hosting
+      - name: 5. Sincronizar archivos por FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -85,8 +45,8 @@ jobs:
           local-dir: ./publish_output/
           server-dir: /wwwroot/
 
-      # 7. Borramos app_offline.htm para que el servidor vuelva a encender con los cambios
-      - name: 7. Encender el sitio web
+      # 6. Borramos app_offline.htm para que el servidor vuelva a encender con los cambios
+      - name: 6. Encender el sitio web
         if: always()
         run: |
           curl -k -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" "ftp://${{ secrets.FTP_SERVER }}/" -Q "-DELE /wwwroot/app_offline.htm" || true
