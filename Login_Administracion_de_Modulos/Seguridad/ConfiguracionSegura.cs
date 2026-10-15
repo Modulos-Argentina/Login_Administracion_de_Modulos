@@ -123,22 +123,15 @@ namespace Login_Administracion_de_Modulos.Seguridad
             }
         }
 
-        /// <summary>
-        /// Devuelve la cadena de conexión real de DefaultConnection o string.Empty
-        /// si es nula, vacía o conserva el texto de marcador.
-        /// </summary>
+        private const string CadenaConexionPorDefecto = "Host=aws-0-us-east-2.pooler.supabase.com;Port=6543;Database=postgres;Username=postgres.oxmjxyywxksuwrcgewdg;Password=Adrianito@2026;SSL Mode=Require;Trust Server Certificate=true;Pooling=false;KeepAlive=30;";
+
         public static string ObtenerCadenaConexion(IConfiguration configuration)
         {
             string? conn = configuration.GetConnectionString("DefaultConnection");
 
-            if (string.IsNullOrWhiteSpace(conn))
+            if (string.IsNullOrWhiteSpace(conn) || conn.Contains(MarcadorConfiguracion, StringComparison.OrdinalIgnoreCase))
             {
-                return string.Empty;
-            }
-
-            if (conn.Contains(MarcadorConfiguracion, StringComparison.OrdinalIgnoreCase))
-            {
-                return string.Empty;
+                return CadenaConexionPorDefecto;
             }
 
             return conn.Trim();

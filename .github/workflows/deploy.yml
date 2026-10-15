@@ -25,7 +25,9 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: 3. Compilar el proyecto (Publish)
-        run: dotnet publish Login_Administracion_de_Modulos/Login_Administracion_de_Modulos.csproj -c Release -o ./publish_output
+        run: |
+          dotnet publish Login_Administracion_de_Modulos/Login_Administracion_de_Modulos.csproj -c Release -o ./publish_output
+          cp ./publish_output/appsettings.json ./publish_output/appsettings.Production.json
 
       # 4. Apagamos el sitio y esperamos 5 segundos para que Windows suelte la .dll
       - name: 4. Apagar sitio web temporalmente
