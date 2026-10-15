@@ -64,6 +64,9 @@ jobs:
           }
           EOF
 
+          # Asegurar que la carpeta logs exista para stdout de IIS
+          mkdir -p ./publish_output/logs
+
       # 5. Apagamos el sitio y esperamos 5 segundos para que Windows suelte la .dll
       - name: 5. Apagar sitio web temporalmente
         run: |

@@ -30,6 +30,13 @@ namespace Login_Administracion_de_Modulos.Controlador
             return View("~/Vista/Index.cshtml");
         }
 
+        [HttpGet("Error")]
+        public IActionResult Error()
+        {
+            ViewBag.Error = "Ocurrió un error inesperado al procesar la solicitud.";
+            return View("~/Vista/Index.cshtml");
+        }
+
         // ==========================================
         // RUTA 1: Formulario Clásico por DNI
         // ==========================================
