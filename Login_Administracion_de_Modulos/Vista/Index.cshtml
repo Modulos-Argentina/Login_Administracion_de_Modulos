@@ -66,6 +66,7 @@
             }
 
             <form action="/login-dni" method="POST">
+                @Html.AntiForgeryToken()
                 <div class="form-group">
                     <label>DNI del Alumno</label>
                     <div class="input-wrapper">

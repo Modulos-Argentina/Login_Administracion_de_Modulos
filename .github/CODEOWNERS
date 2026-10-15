@@ -1,0 +1,23 @@
+# ==============================================================================
+# CODEOWNERS - REGLAS DE REVISIÓN Y PROPIEDAD DE CÓDIGO
+# Sistema de Administración de Módulos - IESTP Argentina
+# ==============================================================================
+
+# 1. NÚCLEO CRÍTICO DEL SISTEMA (Arquitectura, Seguridad, Login y Configuración)
+# Cualquier cambio en el núcleo requiere aprobación obligatoria de:
+/Login_Administracion_de_Modulos/Program.cs              @paulocarreons-max
+/Login_Administracion_de_Modulos/appsettings.json        @paulocarreons-max
+/Login_Administracion_de_Modulos/Controlador/           @paulocarreons-max
+/Login_Administracion_de_Modulos/Seguridad/             @paulocarreons-max
+/Login_Administracion_de_Modulos/Vista/                 @paulocarreons-max
+/.github/                                               @paulocarreons-max
+
+# 2. PROPIEDAD POR MÓDULOS INDEPENDIENTES (Areas/ModuloXX/)
+# Permite asignar a los desarrolladores de cada módulo manteniendo la supervisión general:
+/Login_Administracion_de_Modulos/Areas/Modulo01/        @paulocarreons-max
+/Login_Administracion_de_Modulos/Areas/Modulo02/        @paulocarreons-max
+/Login_Administracion_de_Modulos/Areas/Modulo03/        @paulocarreons-max
+/Login_Administracion_de_Modulos/Areas/Modulo04/        @paulocarreons-max
+/Login_Administracion_de_Modulos/Areas/Modulo05/        @paulocarreons-max
+/Login_Administracion_de_Modulos/Areas/Modulo06/        @paulocarreons-max
+/Login_Administracion_de_Modulos/Areas/Modulo07/        @paulocarreons-max

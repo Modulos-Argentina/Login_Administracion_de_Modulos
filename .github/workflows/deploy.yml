@@ -16,8 +16,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 1. Descargar el código de GitHub
+      - name: 1. Descargar el código de GitHub (Con soporte de submódulos)
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: 2. Preparar .NET Core 10
         uses: actions/setup-dotnet@v4
@@ -27,15 +29,37 @@ jobs:
       - name: 3. Compilar el proyecto (Publish)
         run: dotnet publish -c Release -o ./publish_output
 
-      # 4. Apagamos el sitio y esperamos 5 segundos para que Windows suelte la .dll
-      - name: 4. Apagar sitio web temporalmente
+      # 4. Inyectar configuración de Producción con GitHub Secrets antes del FTP
+      - name: 4. Generar appsettings.Production.json desde GitHub Secrets
+        shell: bash
+        run: |
+          cat <<EOF > ./publish_output/appsettings.Production.json
+          {
+            "ConnectionStrings": {
+              "DefaultConnection": "${{ secrets.DB_CONNECTION_STRING }}"
+            },
+            "Authentication": {
+              "Google": {
+                "ClientId": "${{ secrets.GOOGLE_CLIENT_ID }}",
+                "ClientSecret": "${{ secrets.GOOGLE_CLIENT_SECRET }}"
+              }
+            },
+            "Security": {
+              "EnableDemoLogin": true,
+              "AllowLegacyPasswords": false
+            }
+          }
+          EOF
+
+      # 5. Apagamos el sitio y esperamos 5 segundos para que Windows suelte la .dll
+      - name: 5. Apagar sitio web temporalmente
         run: |
           echo "<html><head><meta charset='utf-8'></head><body><h2>Actualizando... vuelva en 1 minuto.</h2></body></html>" > app_offline.htm
           curl -k -T app_offline.htm -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" "ftp://${{ secrets.FTP_SERVER }}/wwwroot/app_offline.htm" || true
           sleep 5
 
-      # 5. Subir los archivos nuevos al hosting
-      - name: 5. Sincronizar archivos por FTP
+      # 6. Subir los archivos nuevos al hosting
+      - name: 6. Sincronizar archivos por FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -45,8 +69,8 @@ jobs:
           local-dir: ./publish_output/
           server-dir: /wwwroot/
 
-      # 6. Borramos app_offline.htm para que el servidor vuelva a encender con los cambios
-      - name: 6. Encender el sitio web
+      # 7. Borramos app_offline.htm para que el servidor vuelva a encender con los cambios
+      - name: 7. Encender el sitio web
         if: always()
         run: |
           curl -k -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" "ftp://${{ secrets.FTP_SERVER }}/" -Q "-DELE /wwwroot/app_offline.htm" || true

@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using Login_Administracion_de_Modulos.Areas.Modulo05.Models;
+using Login_Administracion_de_Modulos.Seguridad;
 
 namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 {
     [Area("Modulo05")]
     [Route("Modulo05/[controller]")]
+    [ProtegerPanel("Jefe de Soporte", "Soporte")]
     public class SoporteController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly IConfiguration _configuration;
@@ -18,7 +20,7 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
         public SoporteController(IConfiguration configuration)
         {
             _configuration = configuration;
-            string conn = _configuration.GetConnectionString("DefaultConnection") ?? "";
+            string conn = ConfiguracionSegura.ObtenerCadenaConexion(_configuration);
             _ticketRepo = new TicketAveriaRepository(conn);
             _activoRepo = new ActivoHardwareRepository(conn);
         }
@@ -140,7 +142,8 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                     return Json(new { success = false, message = "Debe seleccionar un estado." });
                 }
 
-                bool ok = _ticketRepo.ActualizarEstadoTicket(idIncidencia, nuevoEstado, solucion, 1);
+                int tecnicoId = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
+                bool ok = _ticketRepo.ActualizarEstadoTicket(idIncidencia, nuevoEstado, solucion, tecnicoId);
                 if (ok)
                 {
                     return Json(new

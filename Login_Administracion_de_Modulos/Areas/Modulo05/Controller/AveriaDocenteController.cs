@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using Login_Administracion_de_Modulos.Areas.Modulo05.Models;
+using Login_Administracion_de_Modulos.Seguridad;
 
 namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 {
     [Area("Modulo05")]
     [Route("Modulo05/[controller]")]
+    [ProtegerPanel("Docente", "Profesor")]
     public class AveriaDocenteController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly IConfiguration _configuration;
@@ -18,7 +20,7 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
         public AveriaDocenteController(IConfiguration configuration)
         {
             _configuration = configuration;
-            string conn = _configuration.GetConnectionString("DefaultConnection") ?? "";
+            string conn = ConfiguracionSegura.ObtenerCadenaConexion(_configuration);
             _ticketRepo = new TicketAveriaRepository(conn);
             _activoRepo = new ActivoHardwareRepository(conn);
         }
@@ -53,7 +55,7 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 
             ViewData["Title"] = "Mis Reportes de Averías";
             ViewData["Role"] = "Docente Académico";
-            int docenteId = 1; // Docente en sesión
+            int docenteId = HttpContext.Session.GetInt32("UsuarioId") ?? 1; // Docente en sesión
             var reportes = _ticketRepo.ObtenerReportesPorDocente(docenteId);
             return PartialView("~/Areas/Modulo05/Views/averias_docente/mis_reportes.cshtml", reportes);
         }
@@ -97,10 +99,11 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                     descCompleta = $"[Ambiente/Aula: {ambiente}] {descCompleta}";
                 }
 
+                int reportadorId = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
                 var ticket = new TicketAveriaItem
                 {
                     IdBien = idBien,
-                    ReportadorId = 1, // Docente id
+                    ReportadorId = reportadorId, // Docente id
                     FechaReporte = DateTime.Now,
                     TipoFalla = tipoFalla,
                     Gravedad = string.IsNullOrWhiteSpace(gravedad) ? "Media" : gravedad,

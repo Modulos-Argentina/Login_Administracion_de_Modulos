@@ -370,3 +370,13 @@ app_offline.htm
 
 # VS Code C# Dev Tools - Auto-generated runners
 .vscodecsdt/Runners/
+
+# Archivos de entorno y credenciales sensibles
+.env
+.env.*
+!.env.example
+
+# Archivos de configuración locales y de entorno
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.Production.json

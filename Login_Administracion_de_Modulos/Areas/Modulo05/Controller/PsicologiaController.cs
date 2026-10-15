@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using Login_Administracion_de_Modulos.Areas.Modulo05.Models;
+using Login_Administracion_de_Modulos.Seguridad;
 
 namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 {
     [Area("Modulo05")]
     [Route("Modulo05/[controller]")]
+    [ProtegerPanel("Psicología", "Psicologia")]
     public class PsicologiaController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly IConfiguration _configuration;
@@ -17,7 +19,7 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
         public PsicologiaController(IConfiguration configuration)
         {
             _configuration = configuration;
-            string conn = _configuration.GetConnectionString("DefaultConnection") ?? "";
+            string conn = ConfiguracionSegura.ObtenerCadenaConexion(_configuration);
             _repo = new ExpedientePsicoRepository(conn);
         }
 

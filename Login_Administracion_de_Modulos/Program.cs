@@ -1,13 +1,22 @@
+using Login_Administracion_de_Modulos.Seguridad;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Cargar variables de entorno de .env y variables del sistema (GitHub Secrets / Servidor)
+ConfiguracionSegura.CargarVariablesEntorno(builder);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.Name = ".IESTP.Session";
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
 builder.Services.AddAuthentication(options =>
@@ -24,6 +33,15 @@ builder.Services.AddAuthentication(options =>
 });
 
 var app = builder.Build();
+
+// Inyección de cabeceras de seguridad HTTP
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "SAMEORIGIN");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    await next();
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

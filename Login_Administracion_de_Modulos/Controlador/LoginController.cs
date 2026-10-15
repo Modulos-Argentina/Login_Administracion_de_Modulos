@@ -1,20 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using Login_Administracion_de_Modulos.Model;
+using Login_Administracion_de_Modulos.Seguridad;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Login_Administracion_de_Modulos.Controlador
 {
     public class LoginController : Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger<LoginController> _logger;
 
-        public LoginController(IConfiguration configuration)
+        public LoginController(IConfiguration configuration, ILogger<LoginController> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -27,13 +34,20 @@ namespace Login_Administracion_de_Modulos.Controlador
         // RUTA 1: Formulario Clásico por DNI
         // ==========================================
         [HttpPost("login-dni")]
+        [ValidateAntiForgeryToken]
         public IActionResult LoginDni(string dni, string clave)
         {
-            string? connectionString = _configuration.GetConnectionString("DefaultConnection");
+            string connectionString = ConfiguracionSegura.ObtenerCadenaConexion(_configuration);
 
             if (string.IsNullOrEmpty(connectionString))
             {
-                ViewBag.Error = "Error de configuración de base de datos.";
+                ViewBag.Error = "El servicio de autenticación con base de datos no está configurado.";
+                return View("~/Vista/Index.cshtml");
+            }
+
+            if (string.IsNullOrWhiteSpace(dni) || string.IsNullOrWhiteSpace(clave))
+            {
+                ViewBag.Error = "Debe ingresar su DNI y contraseña.";
                 return View("~/Vista/Index.cshtml");
             }
 
@@ -45,7 +59,7 @@ namespace Login_Administracion_de_Modulos.Controlador
                     
                     // 1. Buscamos al usuario por DNI junto a persona y rol
                     string query = @"
-                        SELECT u.id_usuario, u.clave_cifrada, 
+                        SELECT u.id_usuario, u.clave_cifrada, u.estado,
                                COALESCE(p.nombres, 'Personal') as nombres, 
                                COALESCE(p.apellidos, 'Salud') as apellidos,
                                COALESCE(r.nombre, 'Enfermería (Tópico)') as rol_nombre
@@ -53,38 +67,56 @@ namespace Login_Administracion_de_Modulos.Controlador
                         LEFT JOIN personas p ON u.id_persona = p.id_persona
                         LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario AND ur.estado = 'Activo'
                         LEFT JOIN roles r ON ur.id_rol = r.id_rol
-                        WHERE u.dni_login = @dni AND u.estado = 'Activo'";
+                        WHERE u.dni_login = @dni";
                     
                     using (var command = new NpgsqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@dni", dni ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@dni", dni.Trim());
 
                         using (var reader = command.ExecuteReader())
                         {
                             if (reader.Read())
                             {
                                 int idUsuario = reader.GetInt32(0);
-                                string claveCifradaDb = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-                                string nombres = reader.GetString(2);
-                                string apellidos = reader.GetString(3);
-                                string rolNombre = reader.GetString(4);
-                                
-                                // 2. Validar contraseña
-                                bool esValida = (clave == claveCifradaDb) || 
-                                                (claveCifradaDb == "$2b$10$HashSimuladoDe" + clave) ||
-                                                string.IsNullOrEmpty(claveCifradaDb);
+                                string? claveCifradaDb = reader.IsDBNull(1) ? null : reader.GetString(1);
+                                string estadoUsuario = reader.IsDBNull(2) ? "Inactivo" : reader.GetString(2);
+                                string nombres = reader.GetString(3);
+                                string apellidos = reader.GetString(4);
+                                string rolNombre = reader.GetString(5);
+
+                                // 2. Validar estado del usuario
+                                if (!string.Equals(estadoUsuario, "Activo", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    ViewBag.Error = "Su cuenta de usuario no se encuentra activa en el sistema.";
+                                    return View("~/Vista/Index.cshtml");
+                                }
+
+                                // 3. CRÍTICO: Bloquear login por DNI si la cuenta no tiene contraseña configurada (SSO exclusivo de Google)
+                                if (string.IsNullOrEmpty(claveCifradaDb))
+                                {
+                                    ViewBag.Error = "Esta cuenta utiliza acceso institucional sin contraseña. Ingrese con el botón 'Continuar con Google'.";
+                                    return View("~/Vista/Index.cshtml");
+                                }
+
+                                // 4. Validar contraseña con algoritmo seguro PBKDF2 (SHA-256)
+                                bool allowLegacy = _configuration.GetValue<bool>("Security:AllowLegacyPasswords", true);
+                                bool esValida = PasswordSecurity.VerificarClave(clave, claveCifradaDb, allowLegacy);
 
                                 if (esValida)
                                 {
                                     reader.Close();
 
+                                    // 5. Auditoría y actualización de último acceso
+                                    string? remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+                                    RegistrarAuditoriaYActualizarAcceso(connection, idUsuario, "DNI_LOCAL", remoteIp);
+
                                     // Guardar sesión del usuario
                                     string nombreCompleto = $"{nombres} {apellidos}".Trim();
                                     HttpContext.Session.SetInt32("UsuarioId", idUsuario);
-                                    HttpContext.Session.SetString("UsuarioNombre", string.IsNullOrEmpty(nombreCompleto) ? "Lic. Rosa Fernández" : nombreCompleto);
+                                    HttpContext.Session.SetString("UsuarioNombre", string.IsNullOrEmpty(nombreCompleto) ? "Personal Institucional" : nombreCompleto);
                                     HttpContext.Session.SetString("UsuarioRol", rolNombre);
 
-                                    // Determinar redirección según el rol de la BD
+                                    // Redirección segura según el rol
                                     string redirectUrl = ObtenerRutaDashboardPorRol(rolNombre);
                                     return Redirect(redirectUrl);
                                 }
@@ -105,7 +137,8 @@ namespace Login_Administracion_de_Modulos.Controlador
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Error de conexión: " + ex.Message;
+                _logger.LogError(ex, "Error durante el inicio de sesión por DNI");
+                ViewBag.Error = "Ocurrió un error al procesar el inicio de sesión. Por favor, inténtelo nuevamente más tarde.";
                 return View("~/Vista/Index.cshtml");
             }
         }
@@ -116,14 +149,14 @@ namespace Login_Administracion_de_Modulos.Controlador
         [HttpGet("login-google-oauth")]
         public IActionResult LoginGoogleOAuth()
         {
-            var properties = new Microsoft.AspNetCore.Authentication.AuthenticationProperties { RedirectUri = Url.Action("GoogleResponse") };
+            var properties = new AuthenticationProperties { RedirectUri = Url.Action("GoogleResponse") };
             return Challenge(properties, Microsoft.AspNetCore.Authentication.Google.GoogleDefaults.AuthenticationScheme);
         }
 
         [HttpGet("google-response")]
-        public async System.Threading.Tasks.Task<IActionResult> GoogleResponse()
+        public async Task<IActionResult> GoogleResponse()
         {
-            var result = await HttpContext.AuthenticateAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             
             if (!result.Succeeded)
             {
@@ -136,7 +169,7 @@ namespace Login_Administracion_de_Modulos.Controlador
 
             if (string.IsNullOrEmpty(correo))
             {
-                ViewBag.Error = "No se pudo obtener el correo de Google.";
+                ViewBag.Error = "No se pudo obtener el correo electrónico de Google.";
                 return View("~/Vista/Index.cshtml");
             }
 
@@ -145,11 +178,11 @@ namespace Login_Administracion_de_Modulos.Controlador
 
         private IActionResult ProcessGoogleLogin(string correo)
         {
-            string? connectionString = _configuration.GetConnectionString("DefaultConnection");
+            string connectionString = ConfiguracionSegura.ObtenerCadenaConexion(_configuration);
 
             if (string.IsNullOrEmpty(connectionString))
             {
-                ViewBag.Error = "Error de configuración.";
+                ViewBag.Error = "El servicio de base de datos no está disponible para Google SSO.";
                 return View("~/Vista/Index.cshtml");
             }
 
@@ -160,7 +193,7 @@ namespace Login_Administracion_de_Modulos.Controlador
                     connection.Open();
                     
                     string query = @"
-                        SELECT u.id_usuario, 
+                        SELECT u.id_usuario, u.estado,
                                COALESCE(p.nombres, 'Personal') as nombres, 
                                COALESCE(p.apellidos, 'Salud') as apellidos,
                                COALESCE(r.nombre, 'Enfermería (Tópico)') as rol_nombre
@@ -168,25 +201,37 @@ namespace Login_Administracion_de_Modulos.Controlador
                         LEFT JOIN personas p ON u.id_persona = p.id_persona
                         LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario AND ur.estado = 'Activo'
                         LEFT JOIN roles r ON ur.id_rol = r.id_rol
-                        WHERE u.correo = @correo AND u.estado = 'Activo'";
+                        WHERE LOWER(u.correo) = LOWER(@correo)";
                     
                     using (var command = new NpgsqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@correo", correo ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@correo", correo.Trim());
 
                         using (var reader = command.ExecuteReader())
                         {
                             if (reader.Read())
                             {
                                 int idUsuario = reader.GetInt32(0);
-                                string nombres = reader.GetString(1);
-                                string apellidos = reader.GetString(2);
-                                string rolNombre = reader.GetString(3);
+                                string estadoUsuario = reader.IsDBNull(1) ? "Inactivo" : reader.GetString(1);
+                                string nombres = reader.GetString(2);
+                                string apellidos = reader.GetString(3);
+                                string rolNombre = reader.GetString(4);
+
+                                if (!string.Equals(estadoUsuario, "Activo", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    ViewBag.Error = "Su cuenta de usuario no se encuentra activa en el sistema.";
+                                    return View("~/Vista/Index.cshtml");
+                                }
+
                                 reader.Close();
+
+                                // Auditoría e inicio de sesión
+                                string? remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+                                RegistrarAuditoriaYActualizarAcceso(connection, idUsuario, "GOOGLE_SSO", remoteIp);
 
                                 string nombreCompleto = $"{nombres} {apellidos}".Trim();
                                 HttpContext.Session.SetInt32("UsuarioId", idUsuario);
-                                HttpContext.Session.SetString("UsuarioNombre", string.IsNullOrEmpty(nombreCompleto) ? "Lic. Rosa Fernández" : nombreCompleto);
+                                HttpContext.Session.SetString("UsuarioNombre", string.IsNullOrEmpty(nombreCompleto) ? "Personal Institucional" : nombreCompleto);
                                 HttpContext.Session.SetString("UsuarioRol", rolNombre);
 
                                 string redirectUrl = ObtenerRutaDashboardPorRol(rolNombre);
@@ -194,7 +239,7 @@ namespace Login_Administracion_de_Modulos.Controlador
                             }
                             else
                             {
-                                ViewBag.Error = "Correo no pertenece a la institución o usuario inactivo.";
+                                ViewBag.Error = "El correo institucional no está registrado en el padrón o el usuario está inactivo.";
                                 return View("~/Vista/Index.cshtml");
                             }
                         }
@@ -203,13 +248,53 @@ namespace Login_Administracion_de_Modulos.Controlador
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Error de conexión: " + ex.Message;
+                _logger.LogError(ex, "Error durante el inicio de sesión con Google SSO");
+                ViewBag.Error = "Ocurrió un error al procesar el acceso con Google. Intente nuevamente más tarde.";
                 return View("~/Vista/Index.cshtml");
+            }
+        }
+
+        /// <summary>
+        /// Actualiza ultimo_acceso en usuarios e inserta un registro en sesiones_login para auditoría de seguridad.
+        /// </summary>
+        private void RegistrarAuditoriaYActualizarAcceso(NpgsqlConnection connection, int idUsuario, string metodoAutenticacion, string? ipOrigen)
+        {
+            try
+            {
+                // 1. Actualizar ultimo_acceso en usuarios
+                const string sqlUpdate = "UPDATE usuarios SET ultimo_acceso = CURRENT_TIMESTAMP WHERE id_usuario = @idUsuario;";
+                using (var cmdUpdate = new NpgsqlCommand(sqlUpdate, connection))
+                {
+                    cmdUpdate.Parameters.AddWithValue("@idUsuario", idUsuario);
+                    cmdUpdate.ExecuteNonQuery();
+                }
+
+                // 2. Insertar en sesiones_login (fecha_expiracion = 1 hora a partir de ahora)
+                string safeIp = string.IsNullOrWhiteSpace(ipOrigen) ? "127.0.0.1" : (ipOrigen.Length > 45 ? ipOrigen.Substring(0, 45) : ipOrigen);
+                const string sqlSesion = @"
+                    INSERT INTO sesiones_login 
+                        (id_usuario, metodo_autenticacion, ip_origen, fecha_inicio, fecha_expiracion, estado)
+                    VALUES 
+                        (@idUsuario, @metodo, @ip, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 hour', 'Activa');";
+
+                using (var cmdSesion = new NpgsqlCommand(sqlSesion, connection))
+                {
+                    cmdSesion.Parameters.AddWithValue("@idUsuario", idUsuario);
+                    cmdSesion.Parameters.AddWithValue("@metodo", metodoAutenticacion);
+                    cmdSesion.Parameters.AddWithValue("@ip", safeIp);
+                    cmdSesion.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                // La auditoría no debe bloquear el acceso si falla una tabla secundaria, pero debe registrarse en logs
+                _logger.LogWarning(ex, "Advertencia: No se pudo registrar la auditoría de sesión para el usuario {UsuarioId}", idUsuario);
             }
         }
 
         // ==========================================
         // RUTA 3: Sesión Local de Prueba (Demo sin BD)
+        // REGLA DE ORO: NO ALTERAR NI ELIMINAR ESTA RUTA
         // ==========================================
         [HttpGet("login-demo/{rol}")]
         public IActionResult LoginDemo(string rol)
@@ -327,9 +412,10 @@ namespace Login_Administracion_de_Modulos.Controlador
 
         [HttpGet("logout")]
         [HttpGet("Login/Logout")]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
             HttpContext.Session.Clear();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Login");
         }
 

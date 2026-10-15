@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using Login_Administracion_de_Modulos.Areas.Modulo05.Models;
+using Login_Administracion_de_Modulos.Seguridad;
 
 namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 {
     [Area("Modulo05")]
     [Route("Modulo05/[controller]")]
+    [ProtegerPanel("Enfermería (Tópico)", "Tópico", "Enfermeria")]
     public class EnfermeriaController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly IConfiguration _configuration;
@@ -17,7 +19,7 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
         public EnfermeriaController(IConfiguration configuration)
         {
             _configuration = configuration;
-            string conn = _configuration.GetConnectionString("DefaultConnection") ?? "";
+            string conn = ConfiguracionSegura.ObtenerCadenaConexion(_configuration);
             _repo = new AtencionMedicaRepository(conn);
         }
 
@@ -159,10 +161,11 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                     obsCompleta = $"Medicamento recetado: {medicamentosStr}\n{obsCompleta}".Trim();
                 }
 
+                int atendidoPorId = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
                 var item = new AtencionMedicaItem
                 {
                     PersonaId = paciente.IdPersona,
-                    AtendidoPorId = 1,
+                    AtendidoPorId = atendidoPorId,
                     FechaHora = fechaHora,
                     Motivo = motivo,
                     MedicamentoId = medicamentoId,

@@ -1,40 +1,46 @@
+using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Npgsql;
-using System;
-using Microsoft.AspNetCore.Http;
+using Login_Administracion_de_Modulos.Areas.Modulo05.Models;
+using Login_Administracion_de_Modulos.Seguridad;
 
 namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 {
     [Area("Modulo05")]
     [Route("Modulo05/[controller]")]
+    [ProtegerPanel("Enfermería (Tópico)", "Tópico", "Enfermeria")]
     public class AtencionClinicaController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly AtencionMedicaRepository _repo;
 
         public AtencionClinicaController(IConfiguration configuration)
         {
             _configuration = configuration;
+            string conn = ConfiguracionSegura.ObtenerCadenaConexion(_configuration);
+            _repo = new AtencionMedicaRepository(conn);
         }
 
         // GET: /Modulo05/AtencionClinica/Create
-        // Devuelve PartialView si partial=true o es petición AJAX
         [HttpGet("Create")]
         public IActionResult Create(bool partial = false)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            ViewData["Title"] = "Registro de Atención Clínica";
+            ViewData["Role"] = "Enfermería (Tópico)";
+            ViewBag.Medicamentos = _repo.ListarMedicamentos();
+
             if (partial || isAjax)
             {
                 return PartialView("~/Areas/Modulo05/Views/enfermeria/form_atencion.cshtml");
             }
 
-            ViewData["Title"] = "Registro de Atención Clínica";
-            ViewData["Role"] = "Enfermería (Tópico)";
             return View("~/Areas/Modulo05/Views/enfermeria/form_atencion.cshtml");
         }
 
         // GET: /Modulo05/AtencionClinica/BuscarPaciente?dni=...
-        // Consulta la tabla personas de la base de datos PostgreSQL
         [HttpGet("BuscarPaciente")]
         public IActionResult BuscarPaciente(string dni)
         {
@@ -43,50 +49,27 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                 return Json(new { success = false, message = "Ingrese un número de DNI válido." });
             }
 
-            string? connectionString = _configuration.GetConnectionString("DefaultConnection");
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                return Json(new { success = false, message = "Error de configuración de conexión a base de datos." });
-            }
-
             try
             {
-                using (var connection = new NpgsqlConnection(connectionString))
+                var paciente = _repo.BuscarPacientePorDni(dni);
+                if (paciente != null)
                 {
-                    connection.Open();
-                    string query = "SELECT id_persona, nombres, apellidos, numero_documento FROM personas WHERE numero_documento = @dni LIMIT 1";
-
-                    using (var command = new NpgsqlCommand(query, connection))
+                    return Json(new
                     {
-                        command.Parameters.AddWithValue("@dni", dni.Trim());
-
-                        using (var reader = command.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                string nombres = reader.IsDBNull(1) ? "" : reader.GetString(1);
-                                string apellidos = reader.IsDBNull(2) ? "" : reader.GetString(2);
-
-                                return Json(new
-                                {
-                                    success = true,
-                                    nombres = nombres,
-                                    apellidos = apellidos,
-                                    carrera = "Desarrollo de Sistemas de Información",
-                                    cicloTurno = "IV Ciclo / Turno Noche"
-                                });
-                            }
-                            else
-                            {
-                                return Json(new
-                                {
-                                    success = false,
-                                    message = "No se encontró registro para el DNI " + dni + " en la tabla personas."
-                                });
-                            }
-                        }
-                    }
+                        success = true,
+                        idPersona = paciente.IdPersona,
+                        nombres = paciente.Nombres,
+                        apellidos = paciente.Apellidos,
+                        carrera = "Desarrollo de Sistemas de Información",
+                        cicloTurno = "IV Ciclo / Turno Noche"
+                    });
                 }
+
+                return Json(new
+                {
+                    success = false,
+                    message = $"No se encontró registro para el DNI {dni} en la tabla personas."
+                });
             }
             catch (Exception ex)
             {
@@ -100,14 +83,18 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
         {
             try
             {
-                string? dni = form["buscarDni"];
-                string? motivo = form["motivoAtencion"];
-                string? fechaHoraStr = form["fechaHora"];
-                string? medicamentos = form["medicamentosAdministrados"];
-                string? observaciones = form["observacionesTratamiento"];
-                string? tipoSeguroSalud = form["tipoSeguroSalud"];
-                bool esAlergico = !string.IsNullOrEmpty(form["reportaAlergias"]);
-                string? detalleAlergia = form["especificarAlergias"];
+                string? dni = form["buscarDni"].ToString();
+                if (string.IsNullOrWhiteSpace(dni)) dni = form["dni"].ToString();
+
+                string? motivo = form["motivoAtencion"].ToString();
+                if (string.IsNullOrWhiteSpace(motivo)) motivo = form["motivo"].ToString();
+
+                string? fechaHoraStr = form["fechaHora"].ToString();
+                string? medicamentosStr = form["medicamentosAdministrados"].ToString();
+                string? observaciones = form["observacionesTratamiento"].ToString();
+                string? seguro = form["tipoSeguroSalud"].ToString();
+                bool esAlergico = !string.IsNullOrEmpty(form["reportaAlergias"]) || form["esAlergico"] == "true";
+                string? detalleAlergia = form["especificarAlergias"].ToString();
 
                 if (string.IsNullOrWhiteSpace(dni))
                 {
@@ -119,77 +106,63 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                     return Json(new { success = false, message = "El motivo de atención es obligatorio." });
                 }
 
-                string? connectionString = _configuration.GetConnectionString("DefaultConnection");
-                using (var connection = new NpgsqlConnection(connectionString))
+                var paciente = _repo.BuscarPacientePorDni(dni);
+                if (paciente == null)
                 {
-                    connection.Open();
-
-                    // Obtener id_persona
-                    int idPersona = 0;
-                    using (var cmdPersona = new NpgsqlCommand("SELECT id_persona FROM personas WHERE numero_documento = @dni LIMIT 1", connection))
-                    {
-                        cmdPersona.Parameters.AddWithValue("@dni", dni.Trim());
-                        var result = cmdPersona.ExecuteScalar();
-                        if (result == null)
-                        {
-                            return Json(new { success = false, message = "El DNI no está registrado en el sistema." });
-                        }
-                        idPersona = Convert.ToInt32(result);
-                    }
-
-                    // Insertar atención de tópico
-                    string queryInsert = @"
-                        INSERT INTO atenciones_topico 
-                        (persona_id, atendido_por_id, fecha_hora, motivo, es_alergico, detalle_alergia, seguro_salud, observacion)
-                        VALUES (@persona_id, @atendido_por_id, @fecha_hora, @motivo, @es_alergico, @detalle_alergia, @seguro_salud, @observacion)";
-
-                    using (var cmdInsert = new NpgsqlCommand(queryInsert, connection))
-                    {
-                        cmdInsert.Parameters.AddWithValue("@persona_id", idPersona);
-                        cmdInsert.Parameters.AddWithValue("@atendido_por_id", 1); // Mocked user ID
-                        
-                        DateTime fechaHora = DateTime.Now;
-                        if (!string.IsNullOrEmpty(fechaHoraStr) && DateTime.TryParse(fechaHoraStr, out DateTime parsedDate))
-                        {
-                            fechaHora = parsedDate;
-                        }
-                        cmdInsert.Parameters.AddWithValue("@fecha_hora", fechaHora);
-                        cmdInsert.Parameters.AddWithValue("@motivo", motivo);
-                        cmdInsert.Parameters.AddWithValue("@es_alergico", esAlergico);
-                        string seguroMapeado = "NINGUNO";
-                        if (!string.IsNullOrWhiteSpace(tipoSeguroSalud))
-                        {
-                            string s = tipoSeguroSalud.Trim().ToUpperInvariant();
-                            if (s.Contains("SIS")) seguroMapeado = "SIS";
-                            else if (s.Contains("ESSALUD")) seguroMapeado = "ESSALUD";
-                            else if (s.Contains("PRIVADO") || s.Contains("EPS")) seguroMapeado = "EPS";
-                            else seguroMapeado = "NINGUNO";
-                        }
-                        cmdInsert.Parameters.AddWithValue("@seguro_salud", seguroMapeado);
-                        
-                        string observacionFinal = observaciones ?? "";
-                        if (!string.IsNullOrWhiteSpace(medicamentos)) 
-                        {
-                            observacionFinal = "Medicamentos: " + medicamentos + "\n" + observacionFinal;
-                        }
-
-                        cmdInsert.Parameters.AddWithValue("@observacion", string.IsNullOrEmpty(observacionFinal) ? (object)DBNull.Value : observacionFinal);
-
-                        cmdInsert.ExecuteNonQuery();
-                    }
+                    return Json(new { success = false, message = "El paciente no está registrado en el sistema." });
                 }
 
-                return Json(new
+                DateTime fechaHora = DateTime.Now;
+                if (!string.IsNullOrEmpty(fechaHoraStr) && DateTime.TryParse(fechaHoraStr, out DateTime parsed))
                 {
-                    success = true,
-                    message = "¡Atención clínica registrada exitosamente en el sistema de Tópico!"
-                });
+                    fechaHora = parsed;
+                }
+
+                int? medicamentoId = null;
+                if (int.TryParse(form["medicamentoId"].ToString(), out int medId) && medId > 0)
+                {
+                    medicamentoId = medId;
+                }
+
+                string obsCompleta = observaciones ?? "";
+                if (!string.IsNullOrWhiteSpace(medicamentosStr))
+                {
+                    obsCompleta = $"Medicamento recetado: {medicamentosStr}\n{obsCompleta}".Trim();
+                }
+
+                int atendidoPorId = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
+
+                var item = new AtencionMedicaItem
+                {
+                    PersonaId = paciente.IdPersona,
+                    AtendidoPorId = atendidoPorId,
+                    FechaHora = fechaHora,
+                    Motivo = motivo,
+                    MedicamentoId = medicamentoId,
+                    EsAlergico = esAlergico,
+                    DetalleAlergia = detalleAlergia,
+                    SeguroSalud = string.IsNullOrWhiteSpace(seguro) ? "SIS" : seguro,
+                    Observacion = obsCompleta
+                };
+
+                bool ok = _repo.RegistrarAtencion(item);
+                if (ok)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "¡Atención clínica registrada exitosamente en el sistema de Tópico!"
+                    });
+                }
+
+                return Json(new { success = false, message = "No se pudo registrar la atención." });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Error al procesar registro: " + ex.Message });
             }
         }
+
         // GET: /Modulo05/AtencionClinica/Historial?dni=...
         [HttpGet("Historial")]
         public IActionResult Historial(string dni)
@@ -199,41 +172,10 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
                 return Json(new { success = false, message = "DNI no proporcionado." });
             }
 
-            string? connectionString = _configuration.GetConnectionString("DefaultConnection");
             try
             {
-                using (var connection = new NpgsqlConnection(connectionString))
-                {
-                    connection.Open();
-                    string query = @"
-                        SELECT a.fecha_hora, a.motivo, a.seguro_salud, a.observacion, a.es_alergico, a.detalle_alergia
-                        FROM atenciones_topico a
-                        INNER JOIN personas p ON a.persona_id = p.id_persona
-                        WHERE p.numero_documento = @dni
-                        ORDER BY a.fecha_hora DESC";
-
-                    using (var command = new NpgsqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@dni", dni.Trim());
-                        using (var reader = command.ExecuteReader())
-                        {
-                            var atenciones = new System.Collections.Generic.List<object>();
-                            while (reader.Read())
-                            {
-                                atenciones.Add(new
-                                {
-                                    fechaHora = reader.IsDBNull(0) ? "" : reader.GetDateTime(0).ToString("dd/MM/yyyy HH:mm"),
-                                    motivo = reader.IsDBNull(1) ? "" : reader.GetString(1),
-                                    seguroSalud = reader.IsDBNull(2) ? "Ninguno" : reader.GetString(2),
-                                    observacion = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                                    esAlergico = reader.IsDBNull(4) ? false : reader.GetBoolean(4),
-                                    detalleAlergia = reader.IsDBNull(5) ? "" : reader.GetString(5)
-                                });
-                            }
-                            return Json(new { success = true, data = atenciones });
-                        }
-                    }
-                }
+                var atenciones = _repo.ObtenerHistorialPorDni(dni);
+                return Json(new { success = true, data = atenciones });
             }
             catch (Exception ex)
             {

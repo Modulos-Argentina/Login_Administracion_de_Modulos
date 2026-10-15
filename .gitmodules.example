@@ -1,0 +1,52 @@
+# ==============================================================================
+# EJEMPLO DE CONFIGURACIÓN DE SUBMÓDULOS DE GIT
+# Archivo de referencia: .gitmodules.example
+# ==============================================================================
+# Este archivo documenta cómo conectar los repositorios independientes de cada
+# integrante del equipo dentro de la carpeta /Areas/ de este repositorio central.
+#
+# Para registrar un nuevo submódulo en tu rama de trabajo ejecuta:
+#   git submodule add https://github.com/tu-organizacion/repositorio-modulo04.git Login_Administracion_de_Modulos/Areas/Modulo04
+#   git submodule add https://github.com/tu-organizacion/repositorio-modulo05.git Login_Administracion_de_Modulos/Areas/Modulo05
+#
+# Para clonar el proyecto central con todos los submódulos inicializados:
+#   git clone --recurse-submodules https://github.com/paulocarreons-max/Login_Administracion_de_Modulos.git
+#
+# Para actualizar los submódulos en un clon existente:
+#   git submodule update --init --recursive
+# ==============================================================================
+
+[submodule "Login_Administracion_de_Modulos/Areas/Modulo01"]
+	path = Login_Administracion_de_Modulos/Areas/Modulo01
+	url = https://github.com/paulocarreons-max/IESTP-Modulo01-Matriculas.git
+	branch = main
+
+[submodule "Login_Administracion_de_Modulos/Areas/Modulo02"]
+	path = Login_Administracion_de_Modulos/Areas/Modulo02
+	url = https://github.com/paulocarreons-max/IESTP-Modulo02-Docentes.git
+	branch = main
+
+[submodule "Login_Administracion_de_Modulos/Areas/Modulo03"]
+	path = Login_Administracion_de_Modulos/Areas/Modulo03
+	url = https://github.com/paulocarreons-max/IESTP-Modulo03-Tesoreria.git
+	branch = main
+
+[submodule "Login_Administracion_de_Modulos/Areas/Modulo04"]
+	path = Login_Administracion_de_Modulos/Areas/Modulo04
+	url = https://github.com/paulocarreons-max/IESTP-Modulo04-Inventario.git
+	branch = main
+
+[submodule "Login_Administracion_de_Modulos/Areas/Modulo05"]
+	path = Login_Administracion_de_Modulos/Areas/Modulo05
+	url = https://github.com/paulocarreons-max/IESTP-Modulo05-SaludTopicoPsico.git
+	branch = main
+
+[submodule "Login_Administracion_de_Modulos/Areas/Modulo06"]
+	path = Login_Administracion_de_Modulos/Areas/Modulo06
+	url = https://github.com/paulocarreons-max/IESTP-Modulo06-MesaPartes.git
+	branch = main
+
+[submodule "Login_Administracion_de_Modulos/Areas/Modulo07"]
+	path = Login_Administracion_de_Modulos/Areas/Modulo07
+	url = https://github.com/paulocarreons-max/IESTP-Modulo07-Practicas.git
+	branch = main
