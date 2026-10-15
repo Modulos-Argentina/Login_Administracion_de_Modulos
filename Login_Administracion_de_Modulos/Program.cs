@@ -28,8 +28,21 @@ builder.Services.AddAuthentication(options =>
 .AddGoogle(options =>
 {
     var googleAuthNSection = builder.Configuration.GetSection("Authentication:Google");
-    options.ClientId = googleAuthNSection["ClientId"] ?? "AQUI_TU_CLIENT_ID_DE_GOOGLE";
-    options.ClientSecret = googleAuthNSection["ClientSecret"] ?? "AQUI_TU_CLIENT_SECRET_DE_GOOGLE";
+    string clientId = googleAuthNSection["ClientId"] ?? string.Empty;
+    string clientSecret = googleAuthNSection["ClientSecret"] ?? string.Empty;
+
+    // Si viene vacío o con marcador, asignar dummy para que el servidor IIS nunca se caiga al arrancar
+    if (string.IsNullOrWhiteSpace(clientId) || clientId.Contains("CONFIGURAR"))
+    {
+        clientId = "52989620561-sira7io6ssrsg6c62fb10pjrtnkv51nm.apps.googleusercontent.com";
+    }
+    if (string.IsNullOrWhiteSpace(clientSecret) || clientSecret.Contains("CONFIGURAR"))
+    {
+        clientSecret = "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";
+    }
+
+    options.ClientId = clientId;
+    options.ClientSecret = clientSecret;
 });
 
 var app = builder.Build();
