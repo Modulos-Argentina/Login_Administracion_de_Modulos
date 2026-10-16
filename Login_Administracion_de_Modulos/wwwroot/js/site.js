@@ -38,6 +38,23 @@ function updateThemeToggleUI(theme) {
         btn.setAttribute('title', actionTitle);
         btn.setAttribute('aria-label', actionTitle);
     });
+
+    // Sincronizar tarjetas de selección en modal de configuración si existen
+    const darkCard = document.getElementById('themeChoiceDark');
+    const lightCard = document.getElementById('themeChoiceLight');
+    if (darkCard && lightCard) {
+        if (isLight) {
+            lightCard.classList.add('active');
+            darkCard.classList.remove('active');
+        } else {
+            darkCard.classList.add('active');
+            lightCard.classList.remove('active');
+        }
+    }
+}
+
+function seleccionarTema(theme) {
+    setTheme(theme);
 }
 
 // Escuchar cambios de preferencia del sistema si el usuario no ha forzado un tema manualmente
@@ -47,6 +64,97 @@ if (window.matchMedia) {
             setTheme(e.matches ? 'dark' : 'light');
         }
     });
+}
+
+// =========================================================================
+// IESTP Argentina - Gestor de Menú Desplegable de Perfil y Modales
+// =========================================================================
+
+function toggleProfileDropdown(event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    const dropdown = document.getElementById('headerProfileDropdown');
+    const trigger = document.getElementById('headerUserDropdownTrigger');
+    if (!dropdown || !trigger) return;
+
+    const isOpen = dropdown.classList.contains('open');
+    if (isOpen) {
+        closeProfileDropdown();
+    } else {
+        dropdown.classList.add('open');
+        trigger.classList.add('active');
+        trigger.setAttribute('aria-expanded', 'true');
+    }
+}
+
+function closeProfileDropdown() {
+    const dropdown = document.getElementById('headerProfileDropdown');
+    const trigger = document.getElementById('headerUserDropdownTrigger');
+    if (dropdown) dropdown.classList.remove('open');
+    if (trigger) {
+        trigger.classList.remove('active');
+        trigger.setAttribute('aria-expanded', 'false');
+    }
+}
+
+// Cerrar el menú de perfil al hacer clic en cualquier parte exterior
+document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('headerProfileWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+        closeProfileDropdown();
+    }
+});
+
+// Modales Globales (Mi Perfil y Configuración)
+function abrirModalPerfil() {
+    closeProfileDropdown();
+    const modal = document.getElementById('modalMiPerfil');
+    if (modal) {
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function cerrarModalPerfil() {
+    const modal = document.getElementById('modalMiPerfil');
+    if (modal) {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        if (!document.querySelector('.app-modal-overlay.open')) {
+            document.body.style.overflow = '';
+        }
+    }
+}
+
+function abrirModalConfiguracion() {
+    closeProfileDropdown();
+    updateThemeToggleUI(getTheme());
+    const modal = document.getElementById('modalConfiguracion');
+    if (modal) {
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function cerrarModalConfiguracion() {
+    const modal = document.getElementById('modalConfiguracion');
+    if (modal) {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        if (!document.querySelector('.app-modal-overlay.open')) {
+            document.body.style.overflow = '';
+        }
+    }
+}
+
+function handleModalOverlayClick(event, modalId) {
+    if (event && event.target && event.target.id === modalId) {
+        if (modalId === 'modalMiPerfil') cerrarModalPerfil();
+        else if (modalId === 'modalConfiguracion') cerrarModalConfiguracion();
+    }
 }
 
 // =========================================================================
@@ -106,7 +214,9 @@ function openSidebarMobile() {
 function closeSidebarMobile() {
     document.documentElement.classList.remove('sidebar-mobile-open');
     document.body.classList.remove('sidebar-mobile-open');
-    document.body.style.overflow = '';
+    if (!document.querySelector('.app-modal-overlay.open')) {
+        document.body.style.overflow = '';
+    }
     updateSidebarUI();
 }
 
@@ -150,7 +260,7 @@ function updateSidebarUI() {
     }
 }
 
-// Atajos de teclado: Ctrl+B / Cmd+B para alternar panel, Escape para cerrar en móvil
+// Atajos de teclado: Ctrl+B / Cmd+B para alternar panel, Escape para cerrar en móvil y modales
 document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B')) {
         const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
@@ -160,6 +270,9 @@ document.addEventListener('keydown', function(e) {
         e.preventDefault();
         toggleSidebar();
     } else if (e.key === 'Escape') {
+        closeProfileDropdown();
+        cerrarModalPerfil();
+        cerrarModalConfiguracion();
         if (!isDesktopViewport() && document.body.classList.contains('sidebar-mobile-open')) {
             closeSidebarMobile();
         }
