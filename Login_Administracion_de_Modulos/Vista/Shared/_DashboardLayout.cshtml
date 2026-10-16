@@ -47,10 +47,22 @@
                     <i class="ph ph-shield-check"></i> <span class="demo-badge-text">Sesión Demo</span>
                 </span>
             }
-            <div class="profile-avatar-small" title="@(ViewBag.UserName ?? "Usuario")">
-                @(ViewBag.UserInitials ?? "RF")
+
+            <!-- Perfil del Usuario en Cabecera (Header) -->
+            <div class="header-user-profile" title="@(ViewBag.UserName ?? "Lic. Rosa Fernández") - @(ViewBag.UserRole ?? ViewData["Role"] ?? "Enfermería (Tópico)")">
+                <div class="header-user-avatar">
+                    @(ViewBag.UserInitials ?? "RF")
+                    <span class="online-dot"></span>
+                </div>
+                <div class="header-user-info">
+                    <span class="header-user-name">@(ViewBag.UserName ?? "Lic. Rosa Fernández")</span>
+                    <span class="header-user-role">@(ViewBag.UserRole ?? ViewData["Role"] ?? "Enfermería (Tópico)")</span>
+                </div>
             </div>
-            <a href="/logout" class="btn-icon" title="Cerrar Sesión" aria-label="Cerrar Sesión">
+
+            <div class="header-divider"></div>
+
+            <a href="/logout" class="btn-icon btn-logout-header" title="Cerrar Sesión" aria-label="Cerrar Sesión">
                 <i class="ph ph-sign-out"></i>
             </a>
         </div>
@@ -66,23 +78,15 @@
     </button>
 
     <div class="dashboard-layout">
-        <!-- Sidebar -->
+        <!-- Sidebar (Limpio y enfocado exclusivamente en navegación) -->
         <aside class="sidebar" id="appSidebar">
-            <div class="sidebar-profile">
-                <div class="profile-avatar-large">
-                    @(ViewBag.UserInitials ?? "RF")
-                    <span class="online-dot"></span>
+            <!-- Barra superior móvil para cerrar el drawer -->
+            <div class="sidebar-mobile-header">
+                <div class="sidebar-header-brand">
+                    <i class="ph ph-list-dashes"></i>
+                    <span>Módulos de Acceso</span>
                 </div>
-                <div class="profile-info">
-                    <h4>@(ViewBag.UserName ?? "Lic. Rosa Fernández")</h4>
-                    <p>@(ViewBag.UserRole ?? ViewData["Role"] ?? "Enfermería (Tópico)")</p>
-                </div>
-                <!-- Botón colapsar en PC -->
-                <button type="button" class="sidebar-collapse-desktop-btn" onclick="toggleSidebar()" title="Ocultar panel lateral (Ctrl+B)" aria-label="Ocultar panel lateral">
-                    <i class="ph ph-caret-left"></i>
-                </button>
-                <!-- Botón cerrar en Móvil -->
-                <button type="button" class="sidebar-close-mobile-btn" onclick="closeSidebarMobile()" title="Cerrar menú" aria-label="Cerrar menú">
+                <button type="button" class="btn-icon sidebar-close-mobile-btn" onclick="closeSidebarMobile()" title="Cerrar menú" aria-label="Cerrar menú">
                     <i class="ph ph-x"></i>
                 </button>
             </div>
