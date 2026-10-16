@@ -1,23 +1,31 @@
 # ==============================================================================
-# CODEOWNERS - REGLAS DE REVISIÓN Y PROPIEDAD DE CÓDIGO
-# Sistema de Administración de Módulos - IESTP Argentina
+# CODEOWNERS - REGLAS ESTRICTAS DE REVISION Y PROPIEDAD DE CODIGO
+# Sistema de Administracion de Modulos
+# Administrador Principal: @Jherson-cmd
 # ==============================================================================
 
-# 1. NÚCLEO CRÍTICO DEL SISTEMA (Arquitectura, Seguridad, Login y Configuración)
-# Cualquier cambio en el núcleo requiere aprobación obligatoria de:
-/Login_Administracion_de_Modulos/Program.cs              @paulocarreons-max
-/Login_Administracion_de_Modulos/appsettings.json        @paulocarreons-max
-/Login_Administracion_de_Modulos/Controlador/           @paulocarreons-max
-/Login_Administracion_de_Modulos/Seguridad/             @paulocarreons-max
-/Login_Administracion_de_Modulos/Vista/                 @paulocarreons-max
-/.github/                                               @paulocarreons-max
+# 1. REGLA POR DEFECTO (EL GUARDIAN GLOBAL)
+# Cualquier archivo no especificado abajo requiere aprobacion del administrador.
+* @Jherson-cmd
 
-# 2. PROPIEDAD POR MÓDULOS INDEPENDIENTES (Areas/ModuloXX/)
-# Permite asignar a los desarrolladores de cada módulo manteniendo la supervisión general:
-/Login_Administracion_de_Modulos/Areas/Modulo01/        @paulocarreons-max
-/Login_Administracion_de_Modulos/Areas/Modulo02/        @paulocarreons-max
-/Login_Administracion_de_Modulos/Areas/Modulo03/        @paulocarreons-max
-/Login_Administracion_de_Modulos/Areas/Modulo04/        @paulocarreons-max
-/Login_Administracion_de_Modulos/Areas/Modulo05/        @paulocarreons-max
-/Login_Administracion_de_Modulos/Areas/Modulo06/        @paulocarreons-max
-/Login_Administracion_de_Modulos/Areas/Modulo07/        @paulocarreons-max
+# 2. NUCLEO CRITICO DEL SISTEMA 
+# Configuracion, seguridad y arquitectura base (Solo Jherson-cmd).
+/Login_Administracion_de_Modulos/Program.cs              @Jherson-cmd
+/Login_Administracion_de_Modulos/appsettings.json        @Jherson-cmd
+/Login_Administracion_de_Modulos/Controlador/            @Jherson-cmd
+/Login_Administracion_de_Modulos/Seguridad/              @Jherson-cmd
+/Login_Administracion_de_Modulos/Vista/                  @Jherson-cmd
+/.github/                                                @Jherson-cmd
+
+# 3. PROPIEDAD POR MODULOS INDEPENDIENTES (TRABAJO EN EQUIPO)
+# Se incluye a @Jherson-cmd en todos los modulos para que como administrador 
+# tambien pueda revisar y aprobar cambios si el proyecto lo requiere.
+# (Reemplaza los usuarios de ejemplo por los de tus companeros)
+
+/Login_Administracion_de_Modulos/Areas/Modulo01/        @UsuarioAna @UsuarioCarlos @Jherson-cmd
+/Login_Administracion_de_Modulos/Areas/Modulo02/        @UsuarioCompanero2 @Jherson-cmd
+/Login_Administracion_de_Modulos/Areas/Modulo03/        @UsuarioCompanero3 @Jherson-cmd
+/Login_Administracion_de_Modulos/Areas/Modulo04/        @Jherson-cmd
+/Login_Administracion_de_Modulos/Areas/Modulo05/        @Jherson-cmd
+/Login_Administracion_de_Modulos/Areas/Modulo06/        @Jherson-cmd
+/Login_Administracion_de_Modulos/Areas/Modulo07/        @Jherson-cmd
