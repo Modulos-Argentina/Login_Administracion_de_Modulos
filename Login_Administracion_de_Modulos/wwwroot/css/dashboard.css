@@ -1,15 +1,54 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-:root {
+:root,
+[data-theme="dark"] {
     --bg-main: #0a0e17;
     --bg-sidebar: #0b1120;
     --bg-card: #111827;
+    --bg-card-hover: #172033;
     --text-primary: #ffffff;
     --text-secondary: #9ca3af;
-    --accent-cyan: #00f2fe;
+    --accent-cyan: #00f2fe; /* Celeste marca modo oscuro conservado */
+    --accent-cyan-hover: #38bdf8;
+    --accent-cyan-bg: rgba(0, 242, 254, 0.1);
     --border-color: #1f2937;
+    --border-color-subtle: #2d3748;
     --sidebar-width: 280px;
     --header-height: 60px;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --logo-gradient: linear-gradient(135deg, #00f2fe 0%, #0284c7 100%);
+    --logo-color: #000000;
+    --input-bg: #1f2937;
+    --input-color: #ffffff;
+    --input-border: #374151;
+    --table-header-bg: #0f172a;
+    --table-border: #1f2937;
+    --table-hover: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="light"] {
+    --bg-main: #f8fafc;
+    --bg-sidebar: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --accent-cyan: #0099cc; /* Celeste marca calibrado para alta legibilidad en modo claro */
+    --accent-cyan-hover: #0077a8;
+    --accent-cyan-bg: rgba(0, 153, 204, 0.1);
+    --border-color: #e2e8f0;
+    --border-color-subtle: #cbd5e1;
+    --sidebar-width: 280px;
+    --header-height: 60px;
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --logo-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+    --logo-color: #ffffff;
+    --input-bg: #ffffff;
+    --input-color: #0f172a;
+    --input-border: #cbd5e1;
+    --table-header-bg: #f8fafc;
+    --table-border: #e2e8f0;
+    --table-hover: #f1f5f9;
 }
 
 * {
@@ -42,22 +81,55 @@ body {
     z-index: 100;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.header-brand-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+
+.header-institution-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.header-system-badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
 .logo-container {
     width: 32px;
     height: 32px;
-    background-color: var(--accent-cyan);
+    background: var(--logo-gradient);
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #000;
+    color: var(--logo-color);
     font-size: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0, 153, 204, 0.25);
+    transition: transform 0.2s ease;
+}
+
+.logo-container:hover {
+    transform: scale(1.05);
 }
 
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.85rem;
 }
 
 .profile-avatar-small {
@@ -85,11 +157,62 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
+    text-decoration: none;
 }
 
 .btn-icon:hover {
-    background-color: var(--border-color);
-    color: #fff;
+    background-color: var(--bg-card-hover);
+    color: var(--text-primary);
+    border-color: var(--border-color-subtle);
+}
+
+.btn-sidebar-toggle {
+    position: relative;
+    color: var(--text-secondary);
+}
+
+.btn-sidebar-toggle:hover {
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+}
+
+.btn-sidebar-toggle.active {
+    background-color: var(--accent-cyan-bg);
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+}
+
+.btn-sidebar-toggle i {
+    font-size: 1.25rem;
+    transition: transform 0.2s ease;
+}
+
+.btn-sidebar-toggle:hover i {
+    transform: scale(1.08);
+}
+
+.btn-theme-toggle {
+    color: var(--accent-cyan);
+}
+
+.btn-theme-toggle:hover {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan-hover);
+    transform: translateY(-1px);
+}
+
+/* Control visual de iconos del tema */
+[data-theme="dark"] .theme-icon-light {
+    display: inline-block;
+}
+[data-theme="dark"] .theme-icon-dark {
+    display: none;
+}
+[data-theme="light"] .theme-icon-light {
+    display: none;
+}
+[data-theme="light"] .theme-icon-dark {
+    display: inline-block;
 }
 
 /* Layout */
@@ -110,20 +233,25 @@ body {
     bottom: 0;
     top: var(--header-height);
     left: 0;
+    z-index: 95;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
 }
 
 .sidebar-profile {
-    padding: 1.5rem;
+    padding: 1.25rem 1rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.85rem;
     border-bottom: 1px solid var(--border-color);
+    position: relative;
 }
 
 .profile-avatar-large {
     position: relative;
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     background-color: #fce7f3;
     color: #9d174d;
     border-radius: 12px;
@@ -131,7 +259,8 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
+    flex-shrink: 0;
 }
 
 .online-dot {
@@ -145,20 +274,78 @@ body {
     border-radius: 50%;
 }
 
+.profile-info {
+    flex: 1;
+    min-width: 0;
+}
+
 .profile-info h4 {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #fff;
-    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .profile-info p {
     font-size: 0.75rem;
     color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-collapse-desktop-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background-color: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-left: 0.25rem;
+}
+
+.sidebar-collapse-desktop-btn:hover {
+    background-color: var(--bg-card-hover);
+    color: var(--accent-cyan);
+    border-color: var(--border-color);
+    transform: translateX(-2px);
+}
+
+.sidebar-close-mobile-btn {
+    display: none;
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-left: 0.25rem;
+}
+
+.sidebar-close-mobile-btn:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
 }
 
 .sidebar-nav {
-    padding: 1.5rem 1rem;
+    padding: 1.25rem 0.85rem;
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
@@ -192,17 +379,48 @@ body {
 }
 
 .nav-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    background-color: var(--bg-card-hover);
+    color: var(--text-primary);
 }
 
 .nav-item.active {
-    background-color: rgba(0, 242, 254, 0.1);
+    background-color: var(--accent-cyan-bg);
     color: var(--accent-cyan);
+    font-weight: 600;
 }
 
 .sidebar-footer {
-    padding: 1.5rem 1rem;
+    padding: 1rem 0.85rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-collapse-sidebar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.65rem;
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px dashed var(--border-color-subtle);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-collapse-sidebar:hover {
+    background-color: var(--bg-card-hover);
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+    border-style: solid;
+}
+
+.btn-collapse-sidebar i {
+    font-size: 1.05rem;
 }
 
 .btn-logout {
@@ -210,7 +428,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     width: 100%;
-    padding: 0.875rem 1rem;
+    padding: 0.75rem 1rem;
     background-color: rgba(239, 68, 68, 0.1);
     color: #ef4444;
     border: 1px solid rgba(239, 68, 68, 0.2);
@@ -231,6 +449,76 @@ body {
     flex: 1;
     margin-left: var(--sidebar-width);
     padding: 2.5rem;
+    min-width: 0;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: margin-left;
+}
+
+/* Floating Expand Trigger Button for Desktop */
+.sidebar-floating-expand-btn {
+    position: fixed;
+    left: 0;
+    top: calc(var(--header-height) + 16px);
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px 7px 9px;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 0 10px 10px 0;
+    color: var(--text-secondary);
+    box-shadow: 2px 4px 14px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.25s ease,
+                background-color 0.2s ease,
+                color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+.sidebar-floating-expand-btn i {
+    font-size: 1.15rem;
+    color: var(--accent-cyan);
+    transition: transform 0.2s ease;
+}
+
+.sidebar-floating-expand-btn .floating-tooltip {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.sidebar-floating-expand-btn:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+    box-shadow: 4px 6px 18px rgba(0, 242, 254, 0.25);
+}
+
+.sidebar-floating-expand-btn:hover i {
+    transform: scale(1.15);
+}
+
+/* Backdrop para vista móvil y tablet */
+.sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1040;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
 }
 
 .page-header {
@@ -1418,3 +1706,321 @@ body {
     background: #f8fafc;
     transform: translateY(-1px);
 }
+
+/* =========================================================================
+   ADAPTACIONES GENERALES DE MODO CLARO PARA DASHBOARDS (SPA)
+   Garantiza que todas las vistas (Tópico, Docente, Alumno, Tesorería, etc.)
+   se vean nítidas, limpias y profesionales con el celeste de marca
+   ========================================================================= */
+
+[data-theme="light"] body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .main-content {
+    background-color: var(--bg-main);
+}
+
+[data-theme="light"] .top-header {
+    background-color: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .sidebar {
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+}
+
+[data-theme="light"] .sidebar-profile {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Tarjetas con estilo inline bg-card */
+[data-theme="light"] div[style*="var(--bg-card)"],
+[data-theme="light"] .construction-card {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: var(--card-shadow) !important;
+}
+
+/* Textos y títulos */
+[data-theme="light"] .page-header h1,
+[data-theme="light"] .main-content h1,
+[data-theme="light"] .main-content h2,
+[data-theme="light"] .main-content h3,
+[data-theme="light"] .main-content h4,
+[data-theme="light"] .main-content h5,
+[data-theme="light"] .main-content strong,
+[data-theme="light"] .construction-card h2 {
+    color: var(--text-primary) !important;
+}
+
+/* Reemplazar color blanco forzado inline en textos dentro de main-content */
+[data-theme="light"] .main-content h3[style*="#fff"],
+[data-theme="light"] .main-content h4[style*="#fff"],
+[data-theme="light"] .main-content h2[style*="#fff"],
+[data-theme="light"] .main-content p[style*="#fff"],
+[data-theme="light"] .main-content span[style*="#fff"],
+[data-theme="light"] .main-content td[style*="#fff"],
+[data-theme="light"] .main-content div[style*="color: #fff"]:not(.badge):not([class*="btn"]):not([style*="background"]) {
+    color: var(--text-primary) !important;
+}
+
+/* Botones con fondo relleno mantienen texto blanco */
+[data-theme="light"] .main-content button,
+[data-theme="light"] .main-content .btn,
+[data-theme="light"] .main-content a[style*="background-color: var(--accent-cyan)"],
+[data-theme="light"] .main-content button[style*="background-color: var(--accent-cyan)"] {
+    color: #ffffff !important;
+}
+
+/* Tablas */
+[data-theme="light"] .main-content table {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .main-content table thead tr {
+    background-color: #f1f5f9;
+    border-bottom: 2px solid var(--border-color) !important;
+}
+
+[data-theme="light"] .main-content table thead th {
+    color: #475569 !important;
+    font-weight: 600;
+}
+
+[data-theme="light"] .main-content table tbody tr {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+[data-theme="light"] .main-content table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Campos de Formulario */
+[data-theme="light"] .main-content input[type="text"],
+[data-theme="light"] .main-content input[type="number"],
+[data-theme="light"] .main-content input[type="email"],
+[data-theme="light"] .main-content input[type="date"],
+[data-theme="light"] .main-content input[type="time"],
+[data-theme="light"] .main-content select,
+[data-theme="light"] .main-content textarea {
+    background-color: #ffffff !important;
+    border: 1px solid var(--border-color-subtle) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .main-content input:focus,
+[data-theme="light"] .main-content select:focus,
+[data-theme="light"] .main-content textarea:focus {
+    border-color: var(--accent-cyan) !important;
+    box-shadow: 0 0 0 3px rgba(0, 153, 204, 0.15) !important;
+}
+
+/* Sidebar para roles avanzados en modo claro */
+[data-theme="light"] .sidebar-brand-box {
+    background: #f8fafc;
+    border-color: var(--border-color);
+}
+
+[data-theme="light"] .sidebar-brand-box .brand-details h5 {
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .sidebar-category {
+    color: #64748b;
+}
+
+[data-theme="light"] .sidebar-dropdown-header .dropdown-title {
+    color: #475569;
+}
+
+[data-theme="light"] .sidebar-dropdown-header:hover {
+    background: #f1f5f9;
+}
+
+[data-theme="light"] .sidebar-dropdown-header:hover .dropdown-title {
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .nav-item-jefe,
+[data-theme="light"] .nav-item-computacion,
+[data-theme="light"] .nav-item-admin-taller,
+[data-theme="light"] .nav-item-conta,
+[data-theme="light"] .nav-item-inventario,
+[data-theme="light"] .nav-item-tesoreria {
+    color: #475569;
+}
+
+[data-theme="light"] .nav-item-jefe:hover,
+[data-theme="light"] .nav-item-computacion:hover,
+[data-theme="light"] .nav-item-admin-taller:hover,
+[data-theme="light"] .nav-item-conta:hover,
+[data-theme="light"] .nav-item-inventario:hover,
+[data-theme="light"] .nav-item-tesoreria:hover {
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .tesoreria-profile-card {
+    background: #f8fafc;
+    border-color: var(--border-color);
+}
+
+[data-theme="light"] .tesoreria-profile-card .profile-text h5 {
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .tesoreria-profile-card .btn-salir-tesoreria {
+    color: #475569;
+    border-color: var(--border-color-subtle);
+}
+
+[data-theme="light"] .tesoreria-profile-card .btn-salir-tesoreria:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border-color: #ef4444;
+}
+
+/* Modales */
+[data-theme="light"] .modal-content,
+[data-theme="light"] [id*="modal"] [style*="background-color: var(--bg-card)"],
+[data-theme="light"] [id*="modal"] [style*="#111827"] {
+    background-color: #ffffff !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ========================================================
+   Responsive & Ocultamiento Profesional de Paneles Laterales
+   ======================================================== */
+
+/* En Escritorio (PC >= 992px) */
+@media (min-width: 992px) {
+    html.sidebar-collapsed .sidebar,
+    body.sidebar-collapsed .sidebar {
+        transform: translateX(-100%);
+        box-shadow: none;
+    }
+
+    html.sidebar-collapsed .main-content,
+    body.sidebar-collapsed .main-content {
+        margin-left: 0 !important;
+    }
+
+    html.sidebar-collapsed .sidebar-floating-expand-btn,
+    body.sidebar-collapsed .sidebar-floating-expand-btn {
+        transform: translateX(0);
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+/* En Tablets y Móviles (< 992px) */
+@media (max-width: 991px) {
+    .sidebar {
+        transform: translateX(-100%);
+        z-index: 1050;
+        width: 290px;
+        max-width: 85vw;
+        box-shadow: 10px 0 35px rgba(0, 0, 0, 0.6);
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding: 1.5rem 1.25rem;
+    }
+
+    html.sidebar-mobile-open .sidebar,
+    body.sidebar-mobile-open .sidebar {
+        transform: translateX(0);
+    }
+
+    html.sidebar-mobile-open .sidebar-backdrop,
+    body.sidebar-mobile-open .sidebar-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .sidebar-collapse-desktop-btn {
+        display: none !important;
+    }
+
+    .sidebar-close-mobile-btn {
+        display: flex !important;
+    }
+
+    .btn-collapse-sidebar {
+        display: none !important;
+    }
+
+    .sidebar-floating-expand-btn {
+        display: none !important;
+    }
+}
+
+/* En Pantallas Móviles Pequeñas (< 640px) */
+@media (max-width: 640px) {
+    .top-header {
+        padding: 0 0.85rem;
+    }
+
+    .header-system-badge {
+        display: none;
+    }
+
+    .header-demo-badge .demo-badge-text {
+        display: none;
+    }
+
+    .main-content {
+        padding: 1.25rem 0.75rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.25rem;
+    }
+}
+
+/* Ajustes de Tema Claro para Controles de Barra Lateral */
+[data-theme="light"] .header-institution-name {
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .sidebar-floating-expand-btn {
+    background: #ffffff;
+    border-color: var(--border-color);
+    border-left-color: var(--accent-cyan);
+    box-shadow: 2px 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .sidebar-floating-expand-btn .floating-tooltip {
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .sidebar-floating-expand-btn:hover {
+    background: #f8fafc;
+    box-shadow: 4px 6px 18px rgba(0, 153, 204, 0.18);
+}
+
+[data-theme="light"] .btn-collapse-sidebar {
+    color: #64748b;
+    border-color: #cbd5e1;
+}
+
+[data-theme="light"] .btn-collapse-sidebar:hover {
+    background-color: #f1f5f9;
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+}
+
+[data-theme="light"] .sidebar-collapse-desktop-btn:hover {
+    background-color: #f1f5f9;
+}
+
+[data-theme="light"] .sidebar-footer {
+    border-color: var(--border-color);
+}
+

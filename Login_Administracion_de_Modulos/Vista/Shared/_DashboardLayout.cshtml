@@ -4,6 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Intranet IESTP Argentina</title>
+    <!-- Script inmediato de tema y estado de sidebar (evita parpadeo / FOUC) -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('app-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+
+            const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+            if (isCollapsed && window.innerWidth >= 992) {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="~/css/dashboard.css" />
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@@phosphor-icons/web"></script>
@@ -11,28 +23,51 @@
 <body>
     <!-- Header -->
     <header class="top-header">
-        <div class="logo-container">
-            <i class="ph-fill ph-graduation-cap"></i>
+        <div class="header-left">
+            <button type="button" id="sidebarToggleBtn" class="btn-icon btn-sidebar-toggle" onclick="toggleSidebar()" aria-label="Alternar panel lateral" title="Ocultar / Mostrar panel lateral (Ctrl+B)">
+                <i class="ph ph-sidebar-simple" id="sidebarToggleIcon"></i>
+            </button>
+            <div class="logo-container" title="IESTP Argentina">
+                <i class="ph-fill ph-graduation-cap"></i>
+            </div>
+            <div class="header-brand-info">
+                <span class="header-institution-name">IESTP Argentina</span>
+                <span class="header-system-badge">Intranet</span>
+            </div>
         </div>
         <div class="header-actions">
+            <!-- Selector de Tema (Modo Claro / Modo Oscuro) -->
+            <button type="button" id="dashboardThemeToggleBtn" class="btn-icon btn-theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
+                <i class="ph ph-sun theme-icon-light"></i>
+                <i class="ph ph-moon theme-icon-dark"></i>
+            </button>
             @if (Context.Session.GetString("EsDemo") == "true")
             {
-                <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 10px; border-radius: 20px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
-                    <i class="ph ph-shield-check"></i> Sesión Demo Local
+                <span class="header-demo-badge" style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 10px; border-radius: 20px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                    <i class="ph ph-shield-check"></i> <span class="demo-badge-text">Sesión Demo</span>
                 </span>
             }
-            <div class="profile-avatar-small">
+            <div class="profile-avatar-small" title="@(ViewBag.UserName ?? "Usuario")">
                 @(ViewBag.UserInitials ?? "RF")
             </div>
-            <a href="/logout" class="btn-icon" title="Cerrar Sesión">
+            <a href="/logout" class="btn-icon" title="Cerrar Sesión" aria-label="Cerrar Sesión">
                 <i class="ph ph-sign-out"></i>
             </a>
         </div>
     </header>
 
+    <!-- Backdrop para versión móvil/tablet -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="closeSidebarMobile()"></div>
+
+    <!-- Botón flotante para expandir sidebar cuando está oculta en PC -->
+    <button type="button" id="sidebarFloatingExpandBtn" class="sidebar-floating-expand-btn" onclick="toggleSidebar()" title="Mostrar panel lateral (Ctrl+B)" aria-label="Mostrar panel lateral">
+        <i class="ph ph-sidebar-simple"></i>
+        <span class="floating-tooltip">Mostrar menú</span>
+    </button>
+
     <div class="dashboard-layout">
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="appSidebar">
             <div class="sidebar-profile">
                 <div class="profile-avatar-large">
                     @(ViewBag.UserInitials ?? "RF")
@@ -42,6 +77,14 @@
                     <h4>@(ViewBag.UserName ?? "Lic. Rosa Fernández")</h4>
                     <p>@(ViewBag.UserRole ?? ViewData["Role"] ?? "Enfermería (Tópico)")</p>
                 </div>
+                <!-- Botón colapsar en PC -->
+                <button type="button" class="sidebar-collapse-desktop-btn" onclick="toggleSidebar()" title="Ocultar panel lateral (Ctrl+B)" aria-label="Ocultar panel lateral">
+                    <i class="ph ph-caret-left"></i>
+                </button>
+                <!-- Botón cerrar en Móvil -->
+                <button type="button" class="sidebar-close-mobile-btn" onclick="closeSidebarMobile()" title="Cerrar menú" aria-label="Cerrar menú">
+                    <i class="ph ph-x"></i>
+                </button>
             </div>
 
             <nav class="sidebar-nav">
@@ -49,16 +92,20 @@
             </nav>
 
             <div class="sidebar-footer">
+                <button type="button" class="btn-collapse-sidebar" onclick="toggleSidebar()" title="Ocultar panel lateral (Ctrl+B)">
+                    <i class="ph ph-sidebar-simple"></i>
+                    <span>Ocultar Menú</span>
+                </button>
                 @if (Context.Session.GetString("EsDemo") == "true")
                 {
                     <a href="/" class="btn-logout" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa; margin-bottom: 0.5rem;" title="Volver al selector de roles demo">
                         <i class="ph ph-swap"></i>
-                        Cambiar Panel (Demo)
+                        <span>Cambiar Panel (Demo)</span>
                     </a>
                 }
                 <a href="/logout" class="btn-logout">
                     <i class="ph ph-sign-out"></i>
-                    Cerrar Sesión
+                    <span>Cerrar Sesión</span>
                 </a>
             </div>
         </aside>
@@ -69,6 +116,7 @@
         </main>
     </div>
 
+    <script src="~/js/site.js"></script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>
