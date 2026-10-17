@@ -78,28 +78,38 @@
     transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
 body {
     background-color: var(--bg-dark);
     color: var(--text-primary);
-    min-height: 100vh;
     display: flex;
 }
 
 .login-container {
     display: flex;
-    width: 100%;
-    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
 
-/* Lado Izquierdo (Hero) */
+/* Lado Izquierdo (Hero Fijo / Estático) */
 .left-side {
     flex: 1;
+    height: 100vh;
+    max-height: 100vh;
     position: relative;
     background: url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80') center/cover no-repeat;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     padding: 4rem;
+    overflow: hidden;
 }
 
 .left-side::before {
@@ -178,15 +188,37 @@ body {
     letter-spacing: 0.05em;
 }
 
-/* Lado Derecho (Formulario de Login) */
+/* Lado Derecho (Formulario de Login con Scroll Independiente) */
 .right-side {
-    width: 480px;
+    width: 500px;
+    height: 100vh;
+    max-height: 100vh;
     background-color: var(--bg-dark);
     display: flex;
     flex-direction: column;
     padding: 2.5rem 3.5rem;
     overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: var(--input-border) transparent;
+}
+
+.right-side::-webkit-scrollbar {
+    width: 6px;
+}
+
+.right-side::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.right-side::-webkit-scrollbar-thumb {
+    background: var(--input-border);
+    border-radius: 999px;
+}
+
+.right-side::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-cyan);
 }
 
 /* Barra superior derecha: Theme Switcher */
@@ -246,7 +278,30 @@ body {
 .logo-container {
     display: flex;
     justify-content: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
+}
+
+.intranet-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.95rem;
+    background: var(--accent-cyan-bg);
+    border: 1px solid var(--accent-cyan);
+    border-radius: 9999px;
+    color: var(--accent-cyan);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 auto 1.25rem auto;
+    width: fit-content;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
+}
+
+.intranet-badge i {
+    font-size: 1rem;
 }
 
 .institute-logo {
@@ -580,14 +635,24 @@ body {
 }
 
 @media (max-width: 900px) {
+    html, body {
+        height: auto;
+        overflow-y: auto;
+    }
     .login-container {
         flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
     }
     .left-side {
         display: none;
     }
     .right-side {
         width: 100%;
-        padding: 2rem;
+        height: auto;
+        max-height: none;
+        overflow-y: visible;
+        padding: 2rem 1.5rem;
     }
 }
