@@ -23,6 +23,7 @@ Bienvenido al repositorio central de la plataforma tecnológica institucional de
 * **Control de Acceso Basado en Roles (`[ProtegerPanel]`):** Filtro de acción de nivel de arquitectura que intercepta cada solicitud a `/Dashboard/...` y a las rutas `/ModuloXX/...`. Valida la identidad y el rol en sesión, protege peticiones AJAX respondiendo HTTP 401/403 en formato JSON, redirige accesos no autorizados a su panel correspondiente e inyecta metadatos del usuario en la vista.
 * **Auditoría Centralizada de Accesos:** Todo inicio de sesión válido (DNI o Google SSO) registra automáticamente la IP de origen, marca de tiempo y método de acceso en la tabla `sesiones_login`, manteniendo trazabilidad de seguridad en PostgreSQL.
 * **Arquitectura Modular Desacoplada (`Areas/ModuloXX`):** Estructura preparada para integrar los submódulos de cada equipo de desarrollo mediante repositorios independientes de GitHub (`git submodule`) o ramas aisladas gobernadas por flujos automáticos de CI/CD.
+* **Tutor IA Guardián de Compilación (Google Gemini en CI/CD):** Sistema pionero de DevOps pedagógico y protector de producción. Cada vez que se compila el proyecto en GitHub Actions, si surge algún error de compilación C# (`error CS`, `MSB`), el Tutor IA intercepta el fallo, filtra el ruido del compilador y genera un diagnóstico en español con 3 puntos clave (¿Qué pasó?, Archivo y línea afectada, Solución recomendada), deteniendo inmediatamente el despliegue para proteger la integridad del hosting en MonsterASP.
 
 ## 2. Stack Tecnológico y Arquitectura
 
@@ -38,7 +39,8 @@ Bienvenido al repositorio central de la plataforma tecnológica institucional de
 | **Cookies y Sesiones** | Cookie Session `.IESTP.Session` | Nativo | Cookies blindadas con `HttpOnly = true`, `SameSite = Lax` y expiración controlada por inactividad (60 min). |
 | **Cabeceras de Seguridad** | Middleware HTTP Personalizado | Nativo | Inyección automática de `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN` y `Referrer-Policy`. |
 | **Frontend** | Razor Views (`.cshtml`) + CSS | HTML5 / CSS3 | Vistas limpias y diseño responsivo, maquetado con variables CSS, Phosphor Icons y Bootstrap 5. |
-| **Gobernanza y CI/CD** | GitHub Actions + `CODEOWNERS` | CI/CD | Despliegue continuo a MonsterASP (`deploy.yml`) y bloqueo estricto de ramas por módulo (`proteger-ramas-modulos.yml`). |
+| **Tutor IA Guardián** | Python + Google Gemini REST API | 2.0 / 1.5 Flash | Script de análisis en CI/CD (`guardian.py`). Filtro de errores C# y diagnóstico pedagógico con Circuit Breaker. |
+| **Gobernanza y CI/CD** | GitHub Actions + `CODEOWNERS` | CI/CD | Despliegue seguro a MonsterASP con pre-compilación (`deploy.yml`), inyección de secretos en caliente (`inject-secrets.py`) y bloqueo estricto de ramas por módulo (`proteger-ramas-modulos.yml`). |
 
 ### 2.1 Dependencias y Paquetes NuGet del Proyecto
 
@@ -117,11 +119,14 @@ A continuación se detalla la organización integral del código, destacando la 
 
 ```
 Login_Administracion_de_Modulos/
-├── .github/                                     # 🛡️ GOBERNANZA Y AUTOMATIZACIÓN (Protegido)
+├── .github/                                     # 🛡️ GOBERNANZA, CI/CD E INTELIGENCIA ARTIFICIAL
 │   ├── CODEOWNERS                               # Asignación obligatoria de revisores por carpeta
+│   ├── scripts/                                 # Scripts de automatización y gobernanza
+│   │   ├── guardian.py                          # 🤖 Tutor IA Guardián (.NET Build + Gemini Flash + Circuit Breaker)
+│   │   └── inject-secrets.py                    # Inyección en caliente de secretos de producción para MonsterASP
 │   └── workflows/
-│       ├── deploy.yml                           # Despliegue automático FTP a MonsterASP en push a master
-│       └── proteger-ramas-modulos.yml           # Verificación de alcance estricto por rama de módulo
+│       ├── deploy.yml                           # Despliegue continuo FTP protegido a MonsterASP con validación IA
+│       └── proteger-ramas-modulos.yml           # Verificación de alcance estricto por rama con Step Summary
 │
 ├── Login_Administracion_de_Modulos/             # 🛡️ NÚCLEO PADRE DEL SISTEMA (Módulo 8 - Core)
 │   ├── Areas/                                   # 🧩 CONTENEDOR MODULAR DESACOPLADO
@@ -360,11 +365,87 @@ Cada vez que realices `git push` o abras un Pull Request hacia `master`:
 1. El workflow de GitHub Actions detecta el prefijo de tu rama (por ejemplo, `modulo05/...`).
 2. Ejecuta un análisis de diferencias (`git diff --name-only`) respecto a la rama base.
 3. **Verificación Estricta:** Si tu rama modifica archivos dentro de `Login_Administracion_de_Modulos/Areas/Modulo05/`, la verificación pasará exitosamente.
-4. **Bloqueo Automático (Exit 1):** Si tu rama intenta modificar cualquier archivo del Núcleo (`Program.cs`, `LoginController.cs`, `appsettings.json`, `Vista/`) o de otro módulo ajeno (`Areas/Modulo04/`), el workflow fallará automáticamente, bloqueando la integración e indicando la lista de archivos prohibidos.
+4. **Bloqueo Automático y Alerta Visual (Exit 1):** Si tu rama intenta modificar cualquier archivo del Núcleo (`Program.cs`, `LoginController.cs`, `appsettings.json`, `Vista/`) o de otro módulo ajeno (`Areas/Modulo04/`), el workflow fallará automáticamente con una alerta visual de tipo `[!CAUTION]` en **GitHub Actions Step Summary**, bloqueando la integración e indicando la lista exacta de archivos no autorizados.
 
 ---
 
-## 7. Catálogo de Roles y Paneles del Sistema
+## 7. Tutor IA Guardián y Pipeline de Despliegue Continuo (CI/CD a MonsterASP)
+
+Este repositorio implementa una arquitectura pionera de **DevOps Pedagógico y Resiliente**, diseñada específicamente para proteger el servidor de producción en **MonsterASP** mientras brinda retroalimentación instantánea a los desarrolladores y estudiantes cuando ocurre un error de compilación.
+
+```
+                                      FLUJO DE INTEGRACIÓN Y DESPLIEGUE CONTINUO
+                             ┌────────────────────────────────────────────────────────┐
+                             │    git push origin master  /  workflow_dispatch        │
+                             └──────────────────────────┬─────────────────────────────┘
+                                                        │
+                                                        ▼
+                                       ┌────────────────────────────────┐
+                                       │ 1. Descarga (.NET 10 + Python) │
+                                       └────────────────┬───────────────┘
+                                                        │
+                                                        ▼
+                                       ┌────────────────────────────────┐
+                                       │ 2. Pre-compilación de Seguridad│
+                                       │       dotnet build Release     │
+                                       └──────┬──────────────────┬──────┘
+                                              │                  │
+                                 [Compilación Exitosa]      [Error C# / MSBuild]
+                                              │                  │
+                                              │                  ▼
+                                              │   ┌──────────────────────────────────────────┐
+                                              │   │ 🛡️ TUTOR IA GUARDIÁN (guardian.py)       │
+                                              │   │ - Filtra ruido y trunca a <2,500 chars   │
+                                              │   │ - Consulta Gemini (2.0 / 1.5 Flash)      │
+                                              │   │ - Publica en GitHub Step Summary & Logs: │
+                                              │   │     1) ¿Qué pasó?                        │
+                                              │   │     2) Archivo y línea afectada          │
+                                              │   │     3) Solución recomendada en C#        │
+                                              │   │ - Circuit Breaker si no hay API Key / 429│
+                                              │   │ - EXIT 1: Cancela despliegue a MonsterASP│
+                                              │   └──────────────────────────────────────────┘
+                                              │                  │
+                                              │                  ▼
+                                              │       [Hosting 100% Protegido]
+                                              ▼
+                             ┌────────────────────────────────────────────────────────┐
+                             │ 3. Empaquetado Ultra Rápido (0 Tokens Consumidos)       │
+                             │       dotnet publish -c Release --no-build             │
+                             ├────────────────────────────────────────────────────────┤
+                             │ 3.1 Inyección en Caliente de Secretos (inject-secrets) │
+                             │       Inyecta DB_CONNECTION_STRING y Google OAuth en   │
+                             │       appsettings.Production.json y web.config         │
+                             ├────────────────────────────────────────────────────────┤
+                             │ 4. Modo Mantenimiento Transaccional                    │
+                             │       Sube app_offline.htm vía FTP (Windows libera DLL)│
+                             ├────────────────────────────────────────────────────────┤
+                             │ 5. Sincronización FTP Segura a MonsterASP              │
+                             │       FTP-Deploy-Action sincroniza binarios a /wwwroot │
+                             ├────────────────────────────────────────────────────────┤
+                             │ 6. Reactivación Automática del Sitio Web               │
+                             │       Elimina app_offline.htm tras despliegue exitoso  │
+                             └────────────────────────────────────────────────────────┘
+```
+
+### 7.1 ¿Cómo funciona el Tutor IA Guardián (`.github/scripts/guardian.py`)?
+El Tutor IA actúa como un puente formativo y preventivo entre el compilador y los desarrolladores:
+1. **Filtro Quirúrgico de Ruido MSBuild:** Aísla de forma estricta las líneas con errores reales del compilador de C# o MSBuild (`error CSxxxx`, `error MSBxxxx`, `fatal error`), descartando advertencias y salidas cosméticas de restauración. Trunca el contenido a menos de 2,500 caracteres (~40 líneas) para garantizar un consumo mínimo de tokens de IA.
+2. **Diagnóstico Pedagógico Estructurado en 3 Puntos:** La IA Generativa (Google Gemini 2.0 Flash / 1.5 Flash) responde en formato Markdown en español con un tope de 500 tokens:
+   * **1) ¿Qué pasó?:** Explicación empática y sencilla del error de sintaxis, referencia o tipo.
+   * **2) Archivo y línea afectada:** Coordenadas exactas en el árbol de código fuente (`archivo.cs:línea`).
+   * **3) Solución recomendada:** Código C# correctivo o directiva `using ...;` faltante.
+3. **Mecanismo de Circuit Breaker (Tolerancia Extrema a Fallos):** Si la clave `GEMINI_API_KEY` no está configurada en los Secrets del repositorio, se agota la cuota gratuita (HTTP 429 Too Many Requests) o se presenta intermitencia de red, el sistema **no revienta ruidosamente**. Activa el Circuit Breaker, publica el log estándar de .NET en el resumen de GitHub y finaliza con código de salida `1` (`exit 1`), garantizando que jamás se despliegue código roto a producción.
+4. **Visibilidad Dual:** El reporte se publica simultáneamente en **GitHub Actions Step Summary** (con formato de alertas enriquecidas GitHub) y en la **Consola de Terminal del Runner**.
+
+### 7.2 Flujo de Despliegue de Alta Eficiencia a MonsterASP (`.github/workflows/deploy.yml`)
+* **Reutilización de Binarios (`--no-build`):** Si la compilación de seguridad tiene éxito, el paso de empaquetado `dotnet publish` corre con la bandera `--no-build`. Esto ahorra tiempo de cómputo en GitHub Actions y asegura **0 consumo de tokens de IA** en despliegues limpios.
+* **Aislamiento Cero de Secretos en Git:** Las credenciales de producción (cadena de conexión de PostgreSQL de Supabase, Client ID y Client Secret de Google) se inyectan en caliente durante el despliegue dentro del contenedor efímero mediante `inject-secrets.py`, garantizando que el repositorio público jamás contenga datos sensibles ni credenciales hardcodeadas.
+* **Transaccionalidad en MonsterASP:** Se sube un archivo temporal `app_offline.htm` antes de transmitir archivos por FTP. Esto provoca que IIS libere los bloqueos de archivos sobre las `.dll` en Windows Server y evita errores `500.30 ASP.NET Core In-Process Failure` durante la sincronización.
+* **Reactivación Blindada:** El paso de encendido (`Eliminar app_offline.htm`) está condicionado a `steps.apagar_sitio.outcome == 'success'`. Si el despliegue falla antes de apagar el sitio, jamás intentará interactuar de forma errónea con el hosting.
+
+---
+
+## 8. Catálogo de Roles y Paneles del Sistema
 
 El sistema cuenta con **14 roles configurados** con rutas protegidas mediante `[ProtegerPanel]` y rutas de acceso rápido demo:
 
@@ -389,7 +470,7 @@ El sistema cuenta con **14 roles configurados** con rutas protegidas mediante `[
 
 ---
 
-## 8. Documentación Complementaria del Repositorio
+## 9. Documentación Complementaria del Repositorio
 
 Para profundizar en aspectos específicos del proyecto, consulta los documentos especializados incluidos en este repositorio:
 
