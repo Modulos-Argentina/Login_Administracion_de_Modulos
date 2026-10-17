@@ -86,11 +86,26 @@ jobs:
               echo "🚨 ERROR DE SEGURIDAD Y GOBERNANZA: Se detectaron $VIOLACIONES archivo(s) prohibidos."
               echo "La rama '$BRANCH_NAME' tiene permisos limitados a: $CARPETA_PERMITIDA"
               echo "Está terminantemente prohibido modificar el Núcleo (Login, Program.cs, appsettings.json) o carpetas de otros módulos desde esta rama."
+
+              if [ -n "$GITHUB_STEP_SUMMARY" ]; then
+                echo "# 🚨 Tutor Guardián: Violación de Alcance de Módulo" >> "$GITHUB_STEP_SUMMARY"
+                echo "" >> "$GITHUB_STEP_SUMMARY"
+                echo "> [!CAUTION]" >> "$GITHUB_STEP_SUMMARY"
+                echo "> **La rama \`$BRANCH_NAME\` intentó modificar archivos fuera de su ámbito.**" >> "$GITHUB_STEP_SUMMARY"
+                echo "> Carpeta exclusiva autorizada: \`$CARPETA_PERMITIDA\`" >> "$GITHUB_STEP_SUMMARY"
+                echo "" >> "$GITHUB_STEP_SUMMARY"
+                echo "Está prohibido modificar el Núcleo (Login, Program.cs, appsettings.json) o carpetas de otros módulos desde esta rama." >> "$GITHUB_STEP_SUMMARY"
+              fi
+
               exit 1
             fi
 
             echo ""
             echo "🎉 Validación de rama exitosa: Todos los cambios respetan el ámbito de $CARPETA_PERMITIDA."
+            if [ -n "$GITHUB_STEP_SUMMARY" ]; then
+              echo "# ✅ Tutor Guardián: Ámbito de Módulo Válido" >> "$GITHUB_STEP_SUMMARY"
+              echo "Todos los cambios en la rama \`$BRANCH_NAME\` respetan la carpeta autorizada: \`$CARPETA_PERMITIDA\`." >> "$GITHUB_STEP_SUMMARY"
+            fi
           else
             echo "ℹ️ La rama '$BRANCH_NAME' no es de módulo individual. Se procesa como rama de integración o mantenimiento del núcleo."
           fi

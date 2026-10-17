@@ -24,9 +24,35 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: 3. Compilar el proyecto (Publish)
+      - name: 2.1. Preparar entorno Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: 2.2. Validar compilación con Tutor IA Guardián (.NET Build)
+        id: validar_compilacion
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          dotnet publish Login_Administracion_de_Modulos/Login_Administracion_de_Modulos.csproj -c Release -o ./publish_output
+          set +e
+          echo "🔨 Ejecutando compilación previa de seguridad: dotnet build --configuration Release..."
+          dotnet build Login_Administracion_de_Modulos/Login_Administracion_de_Modulos.csproj --configuration Release > build.log 2>&1
+          BUILD_EXIT_CODE=$?
+
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo "❌ La compilación falló con código $BUILD_EXIT_CODE."
+            echo "🛡️ Activando Tutor IA Guardián para diagnosticar el error y proteger el hosting..."
+            cat build.log
+            python3 .github/scripts/guardian.py build.log
+            exit 1
+          fi
+
+          echo "✅ Compilación exitosa (.NET Build Release)."
+          echo "🎉 Código verificado. Continuando con el despliegue a MonsterASP (Consumo: 0 tokens)."
+
+      - name: 3. Compilar y empaquetar el proyecto (Publish)
+        run: |
+          dotnet publish Login_Administracion_de_Modulos/Login_Administracion_de_Modulos.csproj -c Release --no-build -o ./publish_output
 
       - name: 3.1. Inyectar secretos de producción en publish_output
         env:
@@ -38,6 +64,7 @@ jobs:
 
       # 4. Apagamos el sitio y esperamos 5 segundos para que Windows suelte la .dll
       - name: 4. Apagar sitio web temporalmente
+        id: apagar_sitio
         run: |
           echo "<html><head><meta charset='utf-8'></head><body><h2>Actualizando... vuelva en 1 minuto.</h2></body></html>" > app_offline.htm
           curl -k -T app_offline.htm -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" "ftp://${{ secrets.FTP_SERVER }}/wwwroot/app_offline.htm" || true
@@ -56,6 +83,6 @@ jobs:
 
       # 6. Borramos app_offline.htm para que el servidor vuelva a encender con los cambios
       - name: 6. Encender el sitio web
-        if: always()
+        if: always() && steps.apagar_sitio.outcome == 'success'
         run: |
           curl -k -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" "ftp://${{ secrets.FTP_SERVER }}/" -Q "-DELE /wwwroot/app_offline.htm" || true
