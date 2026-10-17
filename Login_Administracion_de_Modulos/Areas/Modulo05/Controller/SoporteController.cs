@@ -10,7 +10,7 @@ namespace Login_Administracion_de_Modulos.Areas.Modulo05.Controller
 {
     [Area("Modulo05")]
     [Route("Modulo05/[controller]")]
-    [ProtegerPanel("Jefe de Soporte", "Soporte")]
+    [ProtegerPanel("Jefe de Soporte", "Soporte", "Practicante", "Practicante TI", "Administrador")]
     public class SoporteController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly IConfiguration _configuration;

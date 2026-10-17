@@ -1149,8 +1149,12 @@ body {
 }
 
 .sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
     padding: 1rem 0.85rem;
     border-top: 1px solid var(--border-color);
+    background-color: var(--bg-sidebar);
 }
 
 .btn-collapse-sidebar {
@@ -1160,7 +1164,7 @@ body {
     gap: 0.5rem;
     width: 100%;
     padding: 0.65rem 0.85rem;
-    margin-bottom: 0.65rem;
+    margin-bottom: 0.15rem;
     background-color: transparent;
     color: var(--text-secondary);
     border: 1px dashed var(--border-color-subtle);
@@ -1169,6 +1173,7 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-sizing: border-box;
 }
 
 .btn-collapse-sidebar:hover {
@@ -1182,25 +1187,48 @@ body {
     font-size: 1.05rem;
 }
 
+.sidebar-action-btn,
 .btn-logout {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
     width: 100%;
-    padding: 0.75rem 1rem;
+    min-width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.95rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    line-height: 1.25;
+}
+
+.sidebar-btn-demo {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.sidebar-btn-demo:hover {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: #93c5fd;
+}
+
+.sidebar-btn-logout,
+.btn-logout {
     background-color: rgba(239, 68, 68, 0.1);
     color: #ef4444;
     border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
 }
 
+.sidebar-btn-logout:hover,
 .btn-logout:hover {
     background-color: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
 }
 
 /* Main Content */
@@ -2970,4 +2998,181 @@ body {
 [data-theme="light"] .sidebar-footer {
     border-color: var(--border-color);
 }
+
+/* =========================================================================
+   BLINDAJE DE ARQUITECTURA: PROTECCIÓN DE LA BARRA LATERAL Y HEADER
+   Inmunidad total frente a estilos invasivos de submódulos o formularios AJAX
+   ========================================================================= */
+
+/* 1. Blindaje del Contenedor de la Barra Lateral */
+aside.sidebar,
+aside.intranet-sidebar {
+    width: var(--sidebar-width) !important;
+    background-color: var(--bg-sidebar) !important;
+    border-right: 1px solid var(--border-color) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    top: var(--header-height) !important;
+    left: 0 !important;
+    z-index: 95 !important;
+    box-sizing: border-box !important;
+}
+
+/* 2. Blindaje de la Navegación */
+.sidebar .sidebar-nav,
+.intranet-sidebar .intranet-sidebar-nav {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 1.25rem 0.85rem !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.sidebar .sidebar-nav .nav-item,
+.intranet-sidebar-nav .nav-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.85rem !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 42px !important;
+    padding: 0.8rem 1rem !important;
+    margin: 0 0 0.4rem 0 !important;
+    color: var(--text-secondary) !important;
+    text-decoration: none !important;
+    border-radius: 8px !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+}
+
+.sidebar .sidebar-nav .nav-item.active,
+.intranet-sidebar-nav .nav-item.active {
+    background-color: var(--accent-cyan-bg) !important;
+    color: var(--accent-cyan) !important;
+    font-weight: 600 !important;
+}
+
+/* 3. Blindaje del Footer de la Barra Lateral contra sobreescritura */
+.sidebar .sidebar-footer,
+.intranet-sidebar .intranet-sidebar-footer {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.65rem !important;
+    padding: 1rem 0.85rem !important;
+    border-top: 1px solid var(--border-color) !important;
+    background-color: var(--bg-sidebar) !important;
+    position: relative !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+}
+
+/* Inmunidad absoluta para los botones del footer */
+.sidebar .sidebar-footer button,
+.sidebar .sidebar-footer a,
+.sidebar .sidebar-footer .btn-collapse-sidebar,
+.sidebar .sidebar-footer .sidebar-action-btn,
+.sidebar .sidebar-footer .sidebar-btn-demo,
+.sidebar .sidebar-footer .sidebar-btn-logout,
+.sidebar .sidebar-footer .btn-logout {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 0.65rem !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 42px !important;
+    padding: 0.75rem 1rem !important;
+    margin: 0 !important;
+    border-radius: 8px !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+    box-sizing: border-box !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    position: static !important;
+    transform: none !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+}
+
+.sidebar .sidebar-footer span,
+.sidebar .sidebar-footer .btn-collapse-sidebar span,
+.sidebar .sidebar-footer .sidebar-action-btn span {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 0.875rem !important;
+    line-height: 1.3 !important;
+}
+
+.sidebar .sidebar-footer i {
+    font-size: 1.15rem !important;
+    flex-shrink: 0 !important;
+}
+
+/* Colores protegidos con máxima especificidad */
+.sidebar .sidebar-footer .btn-collapse-sidebar {
+    background-color: transparent !important;
+    color: var(--text-secondary) !important;
+    border: 1px dashed var(--border-color-subtle) !important;
+    justify-content: center !important;
+}
+.sidebar .sidebar-footer .btn-collapse-sidebar:hover {
+    background-color: var(--bg-card-hover) !important;
+    color: var(--accent-cyan) !important;
+    border-color: var(--accent-cyan) !important;
+    border-style: solid !important;
+}
+
+.sidebar .sidebar-footer .sidebar-btn-demo {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    color: #60a5fa !important;
+}
+.sidebar .sidebar-footer .sidebar-btn-demo:hover {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    color: #93c5fd !important;
+}
+
+.sidebar .sidebar-footer .sidebar-btn-logout,
+.sidebar .sidebar-footer .btn-logout {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.25) !important;
+    color: #ef4444 !important;
+}
+.sidebar .sidebar-footer .sidebar-btn-logout:hover,
+.sidebar .sidebar-footer .btn-logout:hover {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+    color: #fca5a5 !important;
+}
+
+/* 4. Blindaje del Top Header */
+header.top-header,
+header.intranet-top-header {
+    height: var(--header-height) !important;
+    background-color: var(--bg-sidebar) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 100 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 1.5rem !important;
+    box-sizing: border-box !important;
+}
+
 

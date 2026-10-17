@@ -1,42 +1,24 @@
 @{
-    Layout = null;
+    bool isPartial = Context.Request.Headers["X-Requested-With"] == "XMLHttpRequest" 
+        || Context.Request.Query["partial"] == "true";
+    if (!isPartial)
+    {
+        Layout = "~/Vista/Shared/_DashboardLayout.cshtml";
+    }
+    else
+    {
+        Layout = null;
+    }
     ViewData["Title"] = "Registro de Atención Médica - Tópico";
+    ViewData["Role"] = "Enfermería (Tópico)";
 }
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ISTP ARGENTINA - Tópico</title>
-    <!-- Phosphor Icons & Google Fonts -->
-    <link rel="stylesheet" href="https://unpkg.com/@@phosphor-icons/web@2.1.1/src/index.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #050811;
-            /* Patrón de cuadrícula fina (grid) idéntico a la captura */
-            background-image: 
-                linear-gradient(rgba(14, 165, 233, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(14, 165, 233, 0.05) 1px, transparent 1px);
-            background-size: 36px 36px;
-            background-position: center center;
-            color: #f1f5f9;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
+<style>
+    /* Estilos Seguros y Aislados para Registro de Atención Médica (M05) */
+    .clinic-stage-wrapper {
+        color: #f1f5f9;
+        font-family: inherit;
+    }
 
         /* ================= 1. BARRA SUPERIOR (HEADER) ================= */
         .clinic-header-bar {
@@ -172,8 +154,9 @@
             letter-spacing: 0.5px;
         }
 
-        /* Botón Logout */
-        .btn-logout {
+        /* Botón Logout exclusivo del header clínico independiente */
+        .clinic-header-bar .clinic-btn-logout,
+        .clinic-btn-logout {
             width: 36px;
             height: 36px;
             background: rgba(239, 68, 68, 0.08);
@@ -188,7 +171,8 @@
             transition: all 0.2s ease;
         }
 
-        .btn-logout:hover {
+        .clinic-header-bar .clinic-btn-logout:hover,
+        .clinic-btn-logout:hover {
             background: rgba(239, 68, 68, 0.18);
             border-color: #ef4444;
             color: #fca5a5;
@@ -524,10 +508,10 @@
             }
         }
     </style>
-</head>
-<body>
 
-    <!-- ================= 1. BARRA SUPERIOR (HEADER) ================= -->
+@if (!isPartial)
+{
+    <!-- Barra superior solo para acceso directo independiente -->
     <header class="clinic-header-bar">
         <div class="header-brand-group">
             <div class="brand-logo-pill">
@@ -543,13 +527,11 @@
         </div>
 
         <div class="header-actions-group">
-            <!-- Badge de estado con punto verde brillante -->
             <div class="badge-status-db">
                 <div class="dot-pulse-green"></div>
                 <span>PostgreSQL: Online</span>
             </div>
 
-            <!-- Cápsula de perfil de usuario -->
             <div class="user-capsule">
                 <div class="user-avatar-circle">
                     <i class="ph-fill ph-user"></i>
@@ -560,15 +542,15 @@
                 </div>
             </div>
 
-            <!-- Botón rojo bordeado para salir/logout -->
-            <a href="/Login/CerrarSesion" class="btn-logout" title="Cerrar Sesión">
+            <a href="/logout" class="clinic-btn-logout" title="Cerrar Sesión">
                 <i class="ph-bold ph-sign-out"></i>
             </a>
         </div>
     </header>
+}
 
     <!-- ================= 2. CONTENEDOR CENTRAL ================= -->
-    <main class="clinic-container">
+    <div class="clinic-container">
         <div class="clinic-card">
             <form id="formAtencionClinica" onsubmit="event.preventDefault(); guardarAtencionClinica();">
 
@@ -866,5 +848,4 @@
             if (resultadoDiv) resultadoDiv.innerHTML = '';
         }
     </script>
-</body>
-</html>
+</div>

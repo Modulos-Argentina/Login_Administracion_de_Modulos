@@ -185,8 +185,8 @@
     </button>
 
     <div class="dashboard-layout">
-        <!-- Sidebar (Navegación lateral) -->
-        <aside class="sidebar" id="appSidebar">
+        <!-- Sidebar (Navegación lateral protegida) -->
+        <aside class="sidebar intranet-sidebar" id="appSidebar">
             <!-- Barra superior móvil para cerrar el drawer -->
             <div class="sidebar-mobile-header">
                 <div class="sidebar-header-brand">
@@ -198,23 +198,23 @@
                 </button>
             </div>
 
-            <nav class="sidebar-nav">
+            <nav class="sidebar-nav intranet-sidebar-nav">
                 @RenderSection("SidebarNav", required: false)
             </nav>
 
-            <div class="sidebar-footer">
-                <button type="button" class="btn-collapse-sidebar" onclick="toggleSidebar()" title="Ocultar panel lateral (Ctrl+B)">
+            <div class="sidebar-footer intranet-sidebar-footer">
+                <button type="button" class="btn-collapse-sidebar intranet-btn-collapse" onclick="toggleSidebar()" title="Ocultar panel lateral (Ctrl+B)">
                     <i class="ph ph-sidebar-simple"></i>
                     <span>Ocultar Menú</span>
                 </button>
                 @if (isDemoSession)
                 {
-                    <a href="/" class="btn-logout" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa; margin-bottom: 0.5rem;" title="Volver al selector de roles demo">
+                    <a href="/" class="sidebar-action-btn sidebar-btn-demo" title="Volver al selector de roles demo">
                         <i class="ph ph-swap"></i>
                         <span>Cambiar Panel (Demo)</span>
                     </a>
                 }
-                <a href="/logout" class="btn-logout" title="Cerrar sesión actual">
+                <a href="/logout" class="sidebar-action-btn sidebar-btn-logout" title="Cerrar sesión actual">
                     <i class="ph ph-sign-out"></i>
                     <span>Cerrar Sesión</span>
                 </a>

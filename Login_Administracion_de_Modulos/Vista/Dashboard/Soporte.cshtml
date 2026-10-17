@@ -132,18 +132,108 @@
     </div>
 </div>
 
-<script>
-    function mostrarSeccionSoporte(idSeccion, el) {
-        document.querySelectorAll('.sop-section').forEach(sec => sec.style.display = 'none');
-        document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => item.classList.remove('active'));
-        
-        var objetivo = document.getElementById(idSeccion);
-        if (objetivo) {
-            objetivo.style.display = 'block';
-        } else {
-            document.getElementById('seccion-sop-dash').style.display = 'block';
+<!-- 2. CONTENEDOR CONSOLA TÉCNICA (Módulo 05) -->
+<div id="seccion-sop-consola" class="sop-section" style="display: none;"></div>
+
+<!-- 3. CONTENEDOR ESCANEO / EQUIPOS (Módulo 05) -->
+<div id="seccion-sop-scanner" class="sop-section" style="display: none;"></div>
+
+@section Scripts {
+    <script>
+        function mostrarSeccionSoporte(idSeccion, el) {
+            document.querySelectorAll('.sop-section').forEach(sec => sec.style.display = 'none');
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => item.classList.remove('active'));
+            
+            var objetivo = document.getElementById(idSeccion);
+            if (objetivo) {
+                objetivo.style.display = 'block';
+            } else {
+                document.getElementById('seccion-sop-dash').style.display = 'block';
+            }
+
+            if (el) el.classList.add('active');
         }
 
-        if (el) el.classList.add('active');
-    }
-</script>
+        function reejecutarScripts(container) {
+            const scripts = container.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+        }
+
+        function cargarConsolaSoporte(el) {
+            mostrarSeccionSoporte('seccion-sop-consola', el);
+            const container = document.getElementById('seccion-sop-consola');
+
+            if (!container.dataset.loaded) {
+                container.innerHTML = `
+                    <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+                        <i class="ph ph-spinner ph-spin" style="font-size: 2.5rem; color: var(--accent-cyan); margin-bottom: 1rem; display: block;"></i>
+                        <p>Cargando consola técnica de Módulo 05...</p>
+                    </div>
+                `;
+
+                fetch('/Modulo05/Soporte/ConsolaPrincipal?partial=true', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Error HTTP: ' + res.status);
+                    return res.text();
+                })
+                .then(html => {
+                    container.innerHTML = html;
+                    container.dataset.loaded = "true";
+                    reejecutarScripts(container);
+                })
+                .catch(err => {
+                    container.innerHTML = `
+                        <div style="padding: 2rem; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; color: #fca5a5;">
+                            <h4>Error al cargar consola técnica</h4>
+                            <p>${err.message}</p>
+                            <button type="button" onclick="cargarConsolaSoporte(document.getElementById('nav-sop-consola'))" style="margin-top: 10px; padding: 6px 12px; cursor: pointer;">Reintentar</button>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function cargarScannerSoporte(el) {
+            mostrarSeccionSoporte('seccion-sop-scanner', el);
+            const container = document.getElementById('seccion-sop-scanner');
+
+            if (!container.dataset.loaded) {
+                container.innerHTML = `
+                    <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+                        <i class="ph ph-spinner ph-spin" style="font-size: 2.5rem; color: var(--accent-cyan); margin-bottom: 1rem; display: block;"></i>
+                        <p>Cargando inventario y escaneo de hardware de Módulo 05...</p>
+                    </div>
+                `;
+
+                fetch('/Modulo05/Soporte/HistorialEquipos?partial=true', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Error HTTP: ' + res.status);
+                    return res.text();
+                })
+                .then(html => {
+                    container.innerHTML = html;
+                    container.dataset.loaded = "true";
+                    reejecutarScripts(container);
+                })
+                .catch(err => {
+                    container.innerHTML = `
+                        <div style="padding: 2rem; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; color: #fca5a5;">
+                            <h4>Error al cargar escáner de hardware</h4>
+                            <p>${err.message}</p>
+                            <button type="button" onclick="cargarScannerSoporte(document.getElementById('nav-sop-scanner'))" style="margin-top: 10px; padding: 6px 12px; cursor: pointer;">Reintentar</button>
+                        </div>
+                    `;
+                });
+            }
+        }
+    </script>
+}
