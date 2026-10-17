@@ -1,5 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
 
+// Cargar variables de entorno desde .env o variables del sistema operativo
+Login_Administracion_de_Modulos.Seguridad.ConfiguracionSegura.CargarVariablesEntorno(builder);
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
@@ -26,14 +29,24 @@ builder.Services.AddAuthentication(options =>
     string clientId = googleAuthNSection["ClientId"] ?? string.Empty;
     string clientSecret = googleAuthNSection["ClientSecret"] ?? string.Empty;
 
-    // Si viene vacío o con marcador, asignar dummy para que el servidor IIS nunca se caiga al arrancar
-    if (string.IsNullOrWhiteSpace(clientId) || clientId.Contains("CONFIGURAR"))
+    if (string.IsNullOrWhiteSpace(clientId) || clientId.Contains("CONFIGURAR", StringComparison.OrdinalIgnoreCase))
     {
-        clientId = "52989620561-sira7io6ssrsg6c62fb10pjrtnkv51nm.apps.googleusercontent.com";
+        clientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID") ?? string.Empty;
     }
-    if (string.IsNullOrWhiteSpace(clientSecret) || clientSecret.Contains("CONFIGURAR"))
+    if (string.IsNullOrWhiteSpace(clientSecret) || clientSecret.Contains("CONFIGURAR", StringComparison.OrdinalIgnoreCase))
     {
-        clientSecret = "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";
+        clientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET") ?? string.Empty;
+    }
+
+    // Si aún no está configurado, asignar un valor dummy inofensivo para que ASP.NET Core / IIS
+    // arranque sin excepciones en entornos donde Google OAuth aún no se haya provisto
+    if (string.IsNullOrWhiteSpace(clientId) || clientId.Contains("CONFIGURAR", StringComparison.OrdinalIgnoreCase))
+    {
+        clientId = "no-configurado.apps.googleusercontent.com";
+    }
+    if (string.IsNullOrWhiteSpace(clientSecret) || clientSecret.Contains("CONFIGURAR", StringComparison.OrdinalIgnoreCase))
+    {
+        clientSecret = "no-configurado-secret";
     }
 
     options.ClientId = clientId;

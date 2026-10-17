@@ -123,15 +123,18 @@ namespace Login_Administracion_de_Modulos.Seguridad
             }
         }
 
-        private const string CadenaConexionPorDefecto = "Host=aws-0-us-east-2.pooler.supabase.com;Port=6543;Database=postgres;Username=postgres.oxmjxyywxksuwrcgewdg;Password=Adrianito@2026;SSL Mode=Require;Trust Server Certificate=true;Pooling=false;KeepAlive=30;";
-
         public static string ObtenerCadenaConexion(IConfiguration configuration)
         {
             string? conn = configuration.GetConnectionString("DefaultConnection");
 
-            if (string.IsNullOrWhiteSpace(conn) || conn.Contains(MarcadorConfiguracion, StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(conn) || conn.Contains("CONFIGURAR", StringComparison.OrdinalIgnoreCase))
             {
-                return CadenaConexionPorDefecto;
+                conn = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+            }
+
+            if (string.IsNullOrWhiteSpace(conn) || conn.Contains("CONFIGURAR", StringComparison.OrdinalIgnoreCase))
+            {
+                return string.Empty;
             }
 
             return conn.Trim();

@@ -27,7 +27,14 @@ jobs:
       - name: 3. Compilar el proyecto (Publish)
         run: |
           dotnet publish Login_Administracion_de_Modulos/Login_Administracion_de_Modulos.csproj -c Release -o ./publish_output
-          cp ./publish_output/appsettings.json ./publish_output/appsettings.Production.json
+
+      - name: 3.1. Inyectar secretos de producción en publish_output
+        env:
+          PROD_DB_CONNECTION: ${{ secrets.DB_CONNECTION_STRING }}
+          PROD_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          PROD_GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          python3 .github/scripts/inject-secrets.py ./publish_output
 
       # 4. Apagamos el sitio y esperamos 5 segundos para que Windows suelte la .dll
       - name: 4. Apagar sitio web temporalmente
